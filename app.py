@@ -49,14 +49,14 @@ p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
 }
 
 /* Feed posts and tables styling */
-.stDataFrame, .stMarkdown, .stImage {
+.stDataFrame, .stMarkdown {
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.08);
     padding: 15px;
     margin-bottom: 20px;
 }
 
-/* Cards for images */
+/* Cards for feed posts */
 .card {
     border-radius: 15px;
     background: rgba(255,255,255,0.05);
@@ -111,27 +111,20 @@ page = st.session_state.page
 # --------- HOME PAGE ----------
 if page == "Home":
     st.header("🌍 Connecting Christians Worldwide")
-    col1, col2 = st.columns([2,1])
-    with col1:
-        st.markdown("""
-        **Features at your fingertips:**  
-        - Give online securely; access church ministry resources.  
-        - Watch videos and pictures of worship, events, and community outreach.  
-        - Speak psalms, hymns, spiritual songs and upload your own songs.  
-        - Read the Bible and download e-books from the commission.  
-        - Listen to 24-hour worship music and download TOD Daily prayers.  
-        - Find a C25 or CC3 location near you.  
-        - Report incidents affecting any member that needs urgent attention.  
-        - Connect globally — translations to 7000+ languages.  
-        - Social features similar to Facebook & Instagram for Christians.
-        """)
-        st.markdown("**Daily Bible Verse:**")
-        st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
-    with col2:
-        st.image(
-            "https://images.unsplash.com/photo-1598899134739-45b6e8a4c7a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", 
-            caption="Community Worship", use_container_width=True
-        )
+    st.markdown("""
+    **Features at your fingertips:**  
+    - Give online securely; access church ministry resources.  
+    - Watch videos and pictures of worship, events, and community outreach.  
+    - Speak psalms, hymns, spiritual songs and upload your own songs.  
+    - Read the Bible and download e-books from the commission.  
+    - Listen to 24-hour worship music and download TOD Daily prayers.  
+    - Find a C25 or CC3 location near you.  
+    - Report incidents affecting any member that needs urgent attention.  
+    - Connect globally — translations to 7000+ languages.  
+    - Social features similar to Facebook & Instagram for Christians.
+    """)
+    st.markdown("**Daily Bible Verse:**")
+    st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
 
 # --------- FIELD ENTRY ----------
 elif page == "Field Entry":
@@ -154,26 +147,10 @@ elif page == "Field Entry":
 # --------- MEDIA & RESOURCES ----------
 elif page == "Media & Resources":
     st.header("🎥 Media & Resources")
-    col1, col2 = st.columns([2,1])
-    with col1:
-        st.video("https://www.youtube.com/watch?v=F0OzffuqASQ")
-        st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-        st.button("Upload Your Song / Resource")
-        st.markdown("Downloadable e-books, daily prayers, and Bible study materials coming soon!")
-        st.markdown("**Featured Bible Images:**")
-        christian_images = [
-            "https://images.unsplash.com/photo-1598899134739-45b6e8a4c7a5",
-            "https://images.unsplash.com/photo-1613091580878-ef54e8eae1a1",
-            "https://images.unsplash.com/photo-1600400765003-7d3c73831764",
-            "https://images.unsplash.com/photo-1589758438368-5c2e62cd69e8"
-        ]
-        for img in christian_images:
-            st.image(img, use_container_width=True)
-    with col2:
-        st.image(
-            "https://images.unsplash.com/photo-1601085562102-1fc2d146cc4b", 
-            caption="Community Worship", use_container_width=True
-        )
+    st.video("https://www.youtube.com/watch?v=F0OzffuqASQ")
+    st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+    st.button("Upload Your Song / Resource")
+    st.markdown("Downloadable e-books, daily prayers, and Bible study materials coming soon!")
 
 # --------- LOCATIONS ----------
 elif page == "Locations":
@@ -192,17 +169,16 @@ elif page == "Report Incident":
 # --------- CHRISTIAN FEED ----------
 elif page == "Christian Feed":
     st.header("📖 Christian Feed")
-    st.markdown("A feed of Bible verses, inspirational posts, and community images.")
+    st.markdown("A feed of Bible verses and inspirational posts from the community.")
     posts = [
-        {"verse": "Psalm 23:1-2", "text": "The Lord is my shepherd; I shall not want.", "img": "https://images.unsplash.com/photo-1506679189980-1c4ee2956f57"},
-        {"verse": "John 3:16", "text": "For God so loved the world that He gave His only Son.", "img": "https://images.unsplash.com/photo-1522780206493-3f2c2c94880f"},
-        {"verse": "Philippians 4:13", "text": "I can do all things through Christ who strengthens me.", "img": "https://images.unsplash.com/photo-1518655048521-f130df041f66"},
-        {"verse": "Romans 12:12", "text": "Be joyful in hope, patient in affliction, faithful in prayer.", "img": "https://images.unsplash.com/photo-1600400765003-7d3c73831764"},
-        {"verse": "1 Corinthians 13:4-5", "text": "Love is patient, love is kind...", "img": "https://images.unsplash.com/photo-1613091580878-ef54e8eae1a1"}
+        {"verse": "Psalm 23:1-2", "text": "The Lord is my shepherd; I shall not want."},
+        {"verse": "John 3:16", "text": "For God so loved the world that He gave His only Son."},
+        {"verse": "Philippians 4:13", "text": "I can do all things through Christ who strengthens me."},
+        {"verse": "Romans 12:12", "text": "Be joyful in hope, patient in affliction, faithful in prayer."},
+        {"verse": "1 Corinthians 13:4-5", "text": "Love is patient, love is kind..."}
     ]
     for post in posts:
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
-        st.image(post["img"], use_container_width=True)
 
 # --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
@@ -223,4 +199,5 @@ elif page == "Admin":
         st.dataframe(sample_data, use_container_width=True)
     elif email != "":
         st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
+
 
