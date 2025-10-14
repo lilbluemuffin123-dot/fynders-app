@@ -2,13 +2,11 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import random
-import os
 
 # ------------------------
 # DATABASE SETUP
 # ------------------------
-DB_PATH = "fynders.db"
-conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+conn = sqlite3.connect("fynders.db", check_same_thread=False)
 cursor = conn.cursor()
 
 # Users table
@@ -40,6 +38,7 @@ conn.commit()
 # ------------------------
 st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
 st.title("✨ FYNDERS — Field Outreach App")
+st.write("🚀 App is starting...")  # debug message to ensure app loads
 
 # ------------------------
 # LOGIN PAGE
@@ -57,7 +56,7 @@ if "email" not in st.session_state:
             st.error("Please use a valid @c25.com email address.")
 
 # ------------------------
-# MAIN APP (after login)
+# MAIN APP
 # ------------------------
 if "email" in st.session_state:
     email = st.session_state["email"]
@@ -79,9 +78,11 @@ if "email" in st.session_state:
                 contact = st.text_input("Contact Info (Phone/Email)")
                 location = st.text_input("Location (City / Area)")
             with col2:
-                needs = st.multiselect("Needs / Requests",
-                                       ["Follow-Up", "Welfare – Food", "Counselling", "Prayer", "Bible Materials", "Visit"],
-                                       default=["Follow-Up"])
+                needs = st.multiselect(
+                    "Needs / Requests",
+                    ["Follow-Up", "Welfare – Food", "Counselling", "Prayer", "Bible Materials", "Visit"],
+                    default=["Follow-Up"]
+                )
                 notes = st.text_area("Notes / Additional Details", height=120)
             submitted = st.form_submit_button("Submit Entry 🧡")
             if submitted:
