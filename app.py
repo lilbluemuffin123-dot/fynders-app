@@ -183,7 +183,7 @@ elif page == "Christian Feed":
 # --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
-    email = st.text_input("Enter your admin email (must be @c25.com)")
+    email = st.text_input("Enter your admin email")
     
     if email.endswith("@c25.com") and email != "":
         st.header("📋 Admin Dashboard – Follow-Up Overview")
