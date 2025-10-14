@@ -10,7 +10,7 @@ st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
 # HEADER
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
-st.caption("A mock UI demo (no backend logic)")
+st.caption("A mock UI demo")
 
 # ------------------------
 # SIDEBAR: SELECT SECTION
