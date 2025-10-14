@@ -10,7 +10,6 @@ st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
 # HEADER
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
-st.caption("A mock UI demo")
 
 # ------------------------
 # SIDEBAR: SELECT SECTION
@@ -27,12 +26,12 @@ if section == "Newcomer":
     
     if submenu == "Home":
         st.header("Welcome to FYNDERS")
-        st.write("A platform to connect Christians who want to make a difference — together.")
+        st.write("A platform to connect Christians who want to make a difference, together.")
         st.image("https://placekitten.com/600/300", caption="Community Outreach")
     
     elif submenu == "Field Entry":
         st.header("✍️ Field Data Entry")
-        st.write("Fill in the details below (form is not functional in this UI-only demo).")
+        st.write("Fill in the details below (form is not functional in this demo).")
 
         with st.form("field_form"):
             col1, col2 = st.columns(2)
