@@ -126,8 +126,8 @@ if page == "Home":
     st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
 
 # --------- FIELD ENTRY ----------
-elif page == "Field Entry":
-    st.header("✍️ Field Data Entry")
+elif page == "Requests":
+    st.header("✍️ Requests")
     with st.form("field_form"):
         col1, col2 = st.columns(2)
         with col1:
