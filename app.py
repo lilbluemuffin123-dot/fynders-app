@@ -121,7 +121,6 @@ if page == "Home":
     - Find a C25 or CC3 location near you.  
     - Report incidents affecting any member that needs urgent attention.  
     - Connect globally — translations to 7000+ languages.  
-    - Social features similar to Facebook & Instagram for Christians.
     """)
     st.markdown("**Daily Bible Verse:**")
     st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
