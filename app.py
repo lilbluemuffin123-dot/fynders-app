@@ -1,44 +1,11 @@
 import streamlit as st
-import pandas as pd
-import sqlite3
 import random
-
-# ------------------------
-# DATABASE SETUP
-# ------------------------
-conn = sqlite3.connect("fynders.db", check_same_thread=False)
-cursor = conn.cursor()
-
-# Users table
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
-    email TEXT PRIMARY KEY,
-    role TEXT
-)
-""")
-
-# Field logs table
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS field_logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    contact TEXT,
-    location TEXT,
-    needs TEXT,
-    notes TEXT,
-    date TEXT,
-    assigned_to TEXT,
-    status TEXT
-)
-""")
-conn.commit()
 
 # ------------------------
 # APP CONFIG
 # ------------------------
 st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
 st.title("✨ FYNDERS — Field Outreach App")
-st.write("🚀 App is starting...")  # debug message to ensure app loads
 
 # ------------------------
 # LOGIN PAGE
@@ -48,15 +15,13 @@ if "email" not in st.session_state:
     email_input = st.text_input("Email (@c25.com)")
     if st.button("Login"):
         if email_input.endswith("@c25.com"):
-            cursor.execute("INSERT OR IGNORE INTO users (email, role) VALUES (?, ?)", (email_input, "Field Worker"))
-            conn.commit()
             st.session_state["email"] = email_input
             st.success(f"Logged in as **{email_input}**")
         else:
             st.error("Please use a valid @c25.com email address.")
 
 # ------------------------
-# MAIN APP
+# MAIN APP (after login)
 # ------------------------
 if "email" in st.session_state:
     email = st.session_state["email"]
@@ -67,6 +32,7 @@ if "email" in st.session_state:
     if menu == "Home":
         st.header("Welcome to FYNDERS")
         st.write("A platform to connect Christians who want to make a difference — together.")
+        st.info("This is a UI-only version. No database is connected yet.")
 
     # ---------- FIELD ENTRY ----------
     elif menu == "Field Entry":
@@ -87,24 +53,12 @@ if "email" in st.session_state:
             submitted = st.form_submit_button("Submit Entry 🧡")
             if submitted:
                 if name and contact and location:
-                    FOLLOWUP_TEAM = ["John Doe", "Mary Faith", "Samuel Hope", "Esther Joy", "Grace Light"]
-                    assigned_to = random.choice(FOLLOWUP_TEAM)
-                    date = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                    cursor.execute("""
-                        INSERT INTO field_logs 
-                        (name, contact, location, needs, notes, date, assigned_to, status) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (name, contact, location, ", ".join(needs), notes, date, assigned_to, "Assigned"))
-                    conn.commit()
-                    st.success(f"Entry for **{name}** logged successfully. Assigned to **{assigned_to}**.")
+                    assigned_to = random.choice(["John Doe", "Mary Faith", "Samuel Hope", "Esther Joy", "Grace Light"])
+                    st.success(f"Entry for **{name}** submitted! Assigned to **{assigned_to}** (UI only, no DB).")
                 else:
                     st.warning("Please fill in all required fields.")
 
     # ---------- ADMIN DASHBOARD ----------
     elif menu == "Admin Dashboard":
-        st.header("📋 Admin Dashboard – Follow-Up Overview")
-        df = pd.read_sql_query("SELECT * FROM field_logs", conn)
-        if not df.empty:
-            st.dataframe(df)
-        else:
-            st.info("No records yet. Field workers can start logging entries from the Field Entry page.")
+        st.header("📋 Admin Dashboard")
+        st.info("UI-only: No database yet, so no records to display.")
