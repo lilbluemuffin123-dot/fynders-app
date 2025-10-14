@@ -10,6 +10,7 @@ st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
 # HEADER
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
+st.caption("A mock UI demo (no backend logic)")
 
 # ------------------------
 # SIDEBAR: SELECT SECTION
@@ -22,17 +23,33 @@ section = st.sidebar.radio("Select Section", ["Newcomer", "Admin"])
 if section == "Newcomer":
     st.header("Welcome to FYNDERS — Newcomer Section")
     
-    submenu = st.sidebar.selectbox("Menu", ["Home", "Field Entry"])
+    submenu = st.sidebar.selectbox("Menu", ["Home", "Field Entry", "Media & Resources", "Locations", "Report an Incident"])
     
+    # --------- HOME ----------
     if submenu == "Home":
         st.header("Welcome to FYNDERS")
-        st.write("A platform to connect Christians who want to make a difference, together.")
+        st.write("A platform to connect Christians who want to make a difference — together.")
         st.image("https://placekitten.com/600/300", caption="Community Outreach")
+        
+        # Features based on the list
+        st.subheader("Features at your fingertips:")
+        st.markdown("""
+        - Give online through our secure portal; books and church ministry resources available.
+        - Watch videos and pictures of events worldwide, meet friends, share testimonies.
+        - Speak psalms, hymns, spiritual songs and upload your own songs.
+        - Read the Bible and download E-books from the commission.
+        - Listen to 24-hour music ministrations and download TOD Daily prayers.
+        - Seek and find a C25 or CC3 location near you.
+        - Quickly report any incidents needing urgent attention.
+        - Connect globally — features to translate to 7000+ languages.
+        - Social features similar to Facebook & Instagram for Christians.
+        """)
+        st.markdown("---")
     
+    # --------- FIELD ENTRY ----------
     elif submenu == "Field Entry":
         st.header("✍️ Field Data Entry")
-        st.write("Fill in the details below (form is not functional in this demo).")
-
+        st.write("Fill in the details below (form is not functional in this UI-only demo).")
         with st.form("field_form"):
             col1, col2 = st.columns(2)
             with col1:
@@ -47,6 +64,29 @@ if section == "Newcomer":
                 )
                 st.text_area("Notes / Additional Details", height=120)
             st.form_submit_button("Submit Entry 🧡")
+    
+    # --------- MEDIA & RESOURCES ----------
+    elif submenu == "Media & Resources":
+        st.header("🎥 Media & Resources")
+        st.write("Access videos, pictures, songs, and e-books from the ministry.")
+        st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")  # Example video
+        st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")  # Example audio
+        st.button("Upload Your Song / Resource")
+        st.markdown("Downloadable e-books and daily prayers coming soon!")
+    
+    # --------- LOCATIONS ----------
+    elif submenu == "Locations":
+        st.header("📍 Find a C25 or CC3 Location")
+        st.write("Search for nearby ministry locations.")
+        st.text_input("Enter City / Area")
+        st.button("Search Locations")
+    
+    # --------- REPORT INCIDENT ----------
+    elif submenu == "Report an Incident":
+        st.header("🚨 Report an Incident")
+        st.write("Quickly report any incidents affecting community members.")
+        st.text_area("Describe the Incident", height=150)
+        st.button("Submit Report 🧡")
 
 # ------------------------
 # ADMIN SECTION (EMAIL LOGIN)
