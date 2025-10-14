@@ -2,11 +2,13 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import random
+import os
 
 # ------------------------
 # DATABASE SETUP
 # ------------------------
-conn = sqlite3.connect("fynders.db", check_same_thread=False)
+DB_PATH = "fynders.db"
+conn = sqlite3.connect(DB_PATH, check_same_thread=False)
 cursor = conn.cursor()
 
 # Users table
@@ -53,7 +55,11 @@ if "email" not in st.session_state:
             st.success(f"Logged in as **{email_input}**")
         else:
             st.error("Please use a valid @c25.com email address.")
-else:
+
+# ------------------------
+# MAIN APP (after login)
+# ------------------------
+if "email" in st.session_state:
     email = st.session_state["email"]
     st.sidebar.success(f"Welcome {email} 👋")
     menu = st.sidebar.selectbox("Menu", ["Home", "Field Entry", "Admin Dashboard"])
