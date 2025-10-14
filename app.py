@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-import streamlit_authenticator as stauth
 
 # ------------------------
 # DATABASE SETUP
@@ -10,77 +9,90 @@ conn = sqlite3.connect("fynders.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
-    name TEXT,
-    email TEXT,
+    email TEXT PRIMARY KEY,
     role TEXT
 )
 """)
 conn.commit()
 
 # ------------------------
-# AUTHENTICATION SETUP
+# LOGIN PAGE
 # ------------------------
-# You can edit usernames/passwords here or later store them in DB
-names = ["Admin User", "Field Worker"]
-usernames = ["admin", "worker"]
-passwords = ["admin123", "worker123"]
+st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
+st.title("✨ FYNDERS — Field Outreach App")
 
-hashed_passwords = stauth.Hasher(passwords).generate()
+st.write("Please log in with your C25 email to access the system.")
 
-authenticator = stauth.Authenticate(
-    names,
-    usernames,
-    hashed_passwords,
-    "fynder_cookie",
-    "fynder_signature",
-    cookie_expiry_days=30,
-)
+email_input = st.text_input("Email (@c25.com)")
 
-name, authentication_status, username = authenticator.login("Login", "main")
+if st.button("Login"):
+    if email_input.endswith("@c25.com"):
+        # Auto-register if not in DB
+        cursor.execute("SELECT * FROM users WHERE email=?", (email_input,))
+        user = cursor.fetchone()
+        if not user:
+            cursor.execute("INSERT INTO users (email, role) VALUES (?, ?)", (email_input, "Field Worker"))
+            conn.commit()
+        st.success(f"Logged in as **{email_input}**")
+        st.session_state["email"] = email_input
+    else:
+        st.error("Please use a valid @c25.com email address.")
 
 # ------------------------
-# LOGIN LOGIC
+# MAIN APP (after login)
 # ------------------------
-if authentication_status is False:
-    st.error("Username/password is incorrect")
+if "email" in st.session_state:
+    email = st.session_state["email"]
+    st.sidebar.success(f"Welcome {email} 👋")
+    menu = st.sidebar.selectbox("Menu", ["Home", "Field Entry", "Admin Dashboard"])
 
-elif authentication_status is None:
-    st.warning("Please enter your username and password")
-
-elif authentication_status:
-    authenticator.logout("Logout", "sidebar")
-    st.sidebar.success(f"Welcome {name} 👋")
-
-    # ------------------------
-    # MAIN APP
-    # ------------------------
-    st.title("✨ FYNDERS — Bringing Christians Together")
-
-    menu = st.sidebar.selectbox("Menu", ["Home", "Finders Network", "Field Worker Dashboard"])
-
+    # ---------- HOME ----------
     if menu == "Home":
         st.header("Welcome to FYNDERS")
         st.write("A platform to connect Christians who want to make a difference — together.")
-        st.image("https://upload.wikimedia.org/wikipedia/commons/2/21/Cross-Christian-symbol.svg", width=150)
 
-    elif menu == "Finders Network":
-        st.subheader("🌍 Connect with others")
-        name_input = st.text_input("Name")
-        email_input = st.text_input("Email")
-        role_input = st.selectbox("Role", ["Volunteer", "Field Worker", "Leader"])
+    # ---------- FIELD ENTRY ----------
+    elif menu == "Field Entry":
+        st.header("✍️ Field Data Entry")
+        with st.form("field_form"):
+            col1, col2 = st.columns(2)
+            with col1:
+                name = st.text_input("Full Name")
+                contact = st.text_input("Contact Info (Phone/Email)")
+                location = st.text_input("Location (City / Area)")
+            with col2:
+                needs = st.multiselect("Needs / Requests",
+                                       ["Follow-Up", "Welfare – Food", "Counselling", "Prayer", "Bible Materials", "Visit"],
+                                       default=["Follow-Up"])
+                notes = st.text_area("Notes / Additional Details", height=120)
+            submitted = st.form_submit_button("Submit Entry 🧡")
+            if submitted:
+                if name and contact and location:
+                    # Assign follow-up randomly
+                    FOLLOWUP_TEAM = ["John Doe", "Mary Faith", "Samuel Hope", "Esther Joy", "Grace Light"]
+                    assigned_to = FOLLOWUP_TEAM[pd.np.random.randint(0, len(FOLLOWUP_TEAM))]
+                    date = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                    cursor.execute(
+                        "INSERT INTO users (email, role) VALUES (?, ?) ON CONFLICT(email) DO NOTHING", 
+                        (email, "Field Worker")
+                    )
+                    conn.execute("CREATE TABLE IF NOT EXISTS field_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, contact TEXT, location TEXT, needs TEXT, notes TEXT, date TEXT, assigned_to TEXT, status TEXT)")
+                    conn.execute("INSERT INTO field_logs (name, contact, location, needs, notes, date, assigned_to, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                 (name, contact, location, ", ".join(needs), notes, date, assigned_to, "Assigned"))
+                    conn.commit()
+                    st.success(f"Entry for **{name}** logged successfully. Assigned to **{assigned_to}**.")
+                else:
+                    st.warning("Please fill in all required fields.")
 
-        if st.button("Join Network"):
-            if name_input and email_input:
-                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", (name_input, email_input, role_input))
-                conn.commit()
-                st.success(f"{name_input} added to the FYNDERS Network!")
+    # ---------- ADMIN DASHBOARD ----------
+    elif menu == "Admin Dashboard":
+        st.header("📋 Admin Dashboard – Follow-Up Overview")
+        try:
+            df = pd.read_sql_query("SELECT * FROM field_logs", conn)
+            if not df.empty:
+                st.write("### Field Logs")
+                st.dataframe(df)
             else:
-                st.warning("Please fill in all fields.")
-
-        df = pd.read_sql("SELECT * FROM users", conn)
-        st.dataframe(df)
-
-    elif menu == "Field Worker Dashboard":
-        st.subheader("🕊️ Field Worker Dashboard")
-        st.write("Manage your missions, reports, and connections here.")
-        st.info("Coming soon: map view, prayer requests, and event tracking!")
+                st.info("No records yet. Field workers can start logging entries from the Field Entry page.")
+        except:
+            st.info("No records yet. Field workers can start logging entries from the Field Entry page.")
