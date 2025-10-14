@@ -12,16 +12,17 @@ st.set_page_config(
 )
 
 # ------------------------
-# CUSTOM CSS FOR ORANGE THEME AND REMOVING STREAMLIT ICONS
+# CUSTOM CSS FOR FULL ORANGE THEME & STYLING
 # ------------------------
 st.markdown("""
 <style>
-/* Hide Streamlit default menu & footer */
+/* Hide Streamlit default menu, footer, header */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+header {visibility: hidden;}
 
-/* Set full page orange gradient */
-body {
+/* Full page background including sidebar */
+.css-k1vhr4, .css-1outpf7, .css-18e3th9 {
     background: linear-gradient(135deg, #ff9f43, #ff6b00);
     color: white;
 }
@@ -43,6 +44,13 @@ h1, h2, h3, h4, h5, h6 {
 .css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
 .stTextInput>div>div>input {
     color: black;
+}
+
+/* Feed posts and tables styling */
+.stDataFrame, .stMarkdown, .stImage {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
 }
 </style>
 """, unsafe_allow_html=True)
