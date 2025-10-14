@@ -21,8 +21,8 @@ st.markdown("""
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* Full page background including sidebar */
-.css-k1vhr4, .css-1outpf7, .css-18e3th9 {
+/* Full page background (body + main container + padding) */
+body, .stApp, .block-container, .main {
     background: linear-gradient(135deg, #ff9f43, #ff6b00);
     color: white;
 }
