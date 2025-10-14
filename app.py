@@ -25,29 +25,49 @@ header {visibility: hidden;}
 body, .stApp, .block-container, .main {
     background: linear-gradient(135deg, #ff9f43, #ff6b00);
     color: white;
+    font-family: 'Helvetica', sans-serif;
 }
 
-/* Headers */
-h1, h2, h3, h4, h5, h6 {
-    color: #fff4e6;
-}
+/* All text white */
+a {color: white !important; text-decoration: none;}
+p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
 
 /* Buttons */
 .stButton>button {
-    background: linear-gradient(90deg, #ffcc80, #ff6b00);
+    background: linear-gradient(90deg, #ffb84d, #ff6b00);
     color: white;
     font-weight: bold;
-    border-radius: 10px;
+    border-radius: 15px;
     padding: 15px;
     font-size: 18px;
     width: 100%;
+    transition: all 0.2s ease-in-out;
+}
+.stButton>button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
 /* Feed posts and tables styling */
 .stDataFrame, .stMarkdown, .stImage {
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Cards for images */
+.card {
+    border-radius: 15px;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Sidebar styling */
+.css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
+.stTextInput>div>div>input {
+    color: black;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -59,12 +79,12 @@ st.title("✨ FYNDERS — Field Outreach App")
 st.subheader("Connecting Christians Worldwide")
 st.markdown("Select a section below to get started:")
 
-# Create session state to track the current page
+# Session state to track current page
 if "page" not in st.session_state:
     st.session_state.page = "Home"
 
+# Main buttons
 col1, col2 = st.columns(2)
-
 with col1:
     if st.button("🏠 Home"):
         st.session_state.page = "Home"
@@ -88,29 +108,29 @@ with col2:
 # ------------------------
 page = st.session_state.page
 
-# --------- HOME PAGE CONTENT ----------
+# --------- HOME PAGE ----------
 if page == "Home":
     st.header("🌍 Connecting Christians Worldwide")
     col1, col2 = st.columns([2,1])
     with col1:
         st.markdown("""
         **Features at your fingertips:**  
-        - Give online through our secure portal; books and church ministry resources available.  
-        - Watch videos and pictures of events worldwide, meet friends, share testimonies.  
+        - Give online securely; access church ministry resources.  
+        - Watch videos and pictures of worship, events, and community outreach.  
         - Speak psalms, hymns, spiritual songs and upload your own songs.  
-        - Read the Bible and download E-books from the commission.  
-        - Listen to 24-hour music ministrations and download TOD Daily prayers.  
-        - Seek and find a C25 or CC3 location near you.  
-        - Quickly report any incidents needing urgent attention.  
-        - Connect globally — features to translate to 7000+ languages.  
+        - Read the Bible and download e-books from the commission.  
+        - Listen to 24-hour worship music and download TOD Daily prayers.  
+        - Find a C25 or CC3 location near you.  
+        - Report incidents affecting any member that needs urgent attention.  
+        - Connect globally — translations to 7000+ languages.  
         - Social features similar to Facebook & Instagram for Christians.
         """)
         st.markdown("**Daily Bible Verse:**")
         st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
     with col2:
         st.image(
-            "https://images.unsplash.com/photo-1603133872877-96c4a4f64ebd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTR8fGJpYmxlfGVufDB8fDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400", 
-            caption="Community Outreach", use_container_width=True
+            "https://images.unsplash.com/photo-1598899134739-45b6e8a4c7a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400", 
+            caption="Community Worship", use_container_width=True
         )
 
 # --------- FIELD ENTRY ----------
@@ -141,14 +161,18 @@ elif page == "Media & Resources":
         st.button("Upload Your Song / Resource")
         st.markdown("Downloadable e-books, daily prayers, and Bible study materials coming soon!")
         st.markdown("**Featured Bible Images:**")
-        st.image(
-            "https://images.unsplash.com/photo-1596690934914-210c8ef9f67e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8Y2hyaXN0aWFuJTIwYmlibGV8ZW58MHwwfDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400",
-            use_container_width=True
-        )
+        christian_images = [
+            "https://images.unsplash.com/photo-1598899134739-45b6e8a4c7a5",
+            "https://images.unsplash.com/photo-1613091580878-ef54e8eae1a1",
+            "https://images.unsplash.com/photo-1600400765003-7d3c73831764",
+            "https://images.unsplash.com/photo-1589758438368-5c2e62cd69e8"
+        ]
+        for img in christian_images:
+            st.image(img, use_container_width=True)
     with col2:
         st.image(
-            "https://images.unsplash.com/photo-1586880244406-6d9d2b5d26c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2hyaXN0aWFuJTIwbWluaXN0cnl8ZW58MHwwfDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=300", 
-            caption="Community Media", use_container_width=True
+            "https://images.unsplash.com/photo-1601085562102-1fc2d146cc4b", 
+            caption="Community Worship", use_container_width=True
         )
 
 # --------- LOCATIONS ----------
@@ -172,13 +196,13 @@ elif page == "Christian Feed":
     posts = [
         {"verse": "Psalm 23:1-2", "text": "The Lord is my shepherd; I shall not want.", "img": "https://images.unsplash.com/photo-1506679189980-1c4ee2956f57"},
         {"verse": "John 3:16", "text": "For God so loved the world that He gave His only Son.", "img": "https://images.unsplash.com/photo-1522780206493-3f2c2c94880f"},
-        {"verse": "Philippians 4:13", "text": "I can do all things through Christ who strengthens me.", "img": "https://images.unsplash.com/photo-1518655048521-f130df041f66"}
+        {"verse": "Philippians 4:13", "text": "I can do all things through Christ who strengthens me.", "img": "https://images.unsplash.com/photo-1518655048521-f130df041f66"},
+        {"verse": "Romans 12:12", "text": "Be joyful in hope, patient in affliction, faithful in prayer.", "img": "https://images.unsplash.com/photo-1600400765003-7d3c73831764"},
+        {"verse": "1 Corinthians 13:4-5", "text": "Love is patient, love is kind...", "img": "https://images.unsplash.com/photo-1613091580878-ef54e8eae1a1"}
     ]
     for post in posts:
-        st.subheader(post["verse"])
-        st.markdown(post["text"])
+        st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
         st.image(post["img"], use_container_width=True)
-        st.markdown("---")
 
 # --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
