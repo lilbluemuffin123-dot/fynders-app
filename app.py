@@ -4,32 +4,46 @@ import pandas as pd
 # ------------------------
 # APP CONFIG
 # ------------------------
-st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
+st.set_page_config(
+    page_title="FYNDERS",
+    page_icon="🧡",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # ------------------------
-# CUSTOM CSS FOR ORANGE THEME
+# CUSTOM CSS FOR ORANGE THEME AND REMOVING STREAMLIT ICONS
 # ------------------------
 st.markdown("""
 <style>
-/* General page */
+/* Hide Streamlit default menu & footer */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* Set full page orange gradient */
 body {
-    background-color: #fff7f0;
+    background: linear-gradient(135deg, #ff9f43, #ff6b00);
+    color: white;
 }
 
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
-    color: #e37222;
+    color: #fff4e6;
 }
 
 /* Buttons */
 .stButton>button {
-    background: linear-gradient(90deg, #ff9f43, #ff6b00);
+    background: linear-gradient(90deg, #ffcc80, #ff6b00);
     color: white;
     font-weight: bold;
+    border-radius: 10px;
 }
 
 /* Sidebar */
-.css-1d391kg {background-color: #ffe6cc;}
+.css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
+.stTextInput>div>div>input {
+    color: black;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -37,7 +51,7 @@ h1, h2, h3, h4, h5, h6 {
 # HEADER
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
-st.caption("A mock UI demo (no backend logic)")
+st.caption("Connecting Christians Worldwide")
 
 # ------------------------
 # SIDEBAR: SELECT SECTION
@@ -50,7 +64,7 @@ section = st.sidebar.radio("Select Section", ["Newcomer", "Admin"])
 if section == "Newcomer":
     st.header("Welcome to FYNDERS — Newcomer Section")
     
-    submenu = st.sidebar.selectbox("Menu", ["Home", "Field Entry", "Media & Resources", "Locations", "Report an Incident"])
+    submenu = st.sidebar.selectbox("Menu", ["Home", "Field Entry", "Media & Resources", "Locations", "Report an Incident", "Christian Feed"])
     
     # --------- HOME ----------
     if submenu == "Home":
@@ -70,7 +84,7 @@ if section == "Newcomer":
             - Social features similar to Facebook & Instagram for Christians.
             """)
             st.markdown("**Daily Bible Verse:**")
-            st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11")
+            st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
         with col2:
             st.image(
                 "https://images.unsplash.com/photo-1603133872877-96c4a4f64ebd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTR8fGJpYmxlfGVufDB8fDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400", 
@@ -129,6 +143,21 @@ if section == "Newcomer":
         st.text_area("Describe the Incident", height=150)
         st.button("Submit Report 🧡")
         st.info("All reports are monitored by Admins.")
+    
+    # --------- CHRISTIAN FEED ----------
+    elif submenu == "Christian Feed":
+        st.header("📖 Christian Feed")
+        st.markdown("A feed of Bible verses, inspirational posts, and community images.")
+        posts = [
+            {"verse": "Psalm 23:1-2", "text": "The Lord is my shepherd; I shall not want.", "img": "https://images.unsplash.com/photo-1506679189980-1c4ee2956f57"},
+            {"verse": "John 3:16", "text": "For God so loved the world that He gave His only Son.", "img": "https://images.unsplash.com/photo-1522780206493-3f2c2c94880f"},
+            {"verse": "Philippians 4:13", "text": "I can do all things through Christ who strengthens me.", "img": "https://images.unsplash.com/photo-1518655048521-f130df041f66"}
+        ]
+        for post in posts:
+            st.subheader(post["verse"])
+            st.markdown(post["text"])
+            st.image(post["img"], use_container_width=True)
+            st.markdown("---")
 
 # ------------------------
 # ADMIN SECTION (EMAIL LOGIN)
