@@ -7,6 +7,33 @@ import pandas as pd
 st.set_page_config(page_title="FYNDERS", page_icon="🧡", layout="wide")
 
 # ------------------------
+# CUSTOM CSS FOR ORANGE THEME
+# ------------------------
+st.markdown("""
+<style>
+/* General page */
+body {
+    background-color: #fff7f0;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: #e37222;
+}
+
+/* Buttons */
+.stButton>button {
+    background: linear-gradient(90deg, #ff9f43, #ff6b00);
+    color: white;
+    font-weight: bold;
+}
+
+/* Sidebar */
+.css-1d391kg {background-color: #ffe6cc;}
+</style>
+""", unsafe_allow_html=True)
+
+# ------------------------
 # HEADER
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
@@ -27,29 +54,28 @@ if section == "Newcomer":
     
     # --------- HOME ----------
     if submenu == "Home":
-        st.header("Welcome to FYNDERS")
-        st.write("A platform to connect Christians who want to make a difference — together.")
-        st.image("https://placekitten.com/600/300", caption="Community Outreach")
-        
-        # Features based on the list
-        st.subheader("Features at your fingertips:")
-        st.markdown("""
-        - Give online through our secure portal; books and church ministry resources available.
-        - Watch videos and pictures of events worldwide, meet friends, share testimonies.
-        - Speak psalms, hymns, spiritual songs and upload your own songs.
-        - Read the Bible and download E-books from the commission.
-        - Listen to 24-hour music ministrations and download TOD Daily prayers.
-        - Seek and find a C25 or CC3 location near you.
-        - Quickly report any incidents needing urgent attention.
-        - Connect globally — features to translate to 7000+ languages.
-        - Social features similar to Facebook & Instagram for Christians.
-        """)
+        st.header("🌍 Connecting Christians Worldwide")
+        col1, col2 = st.columns([2,1])
+        with col1:
+            st.markdown("""
+            **Features at your fingertips:**  
+            - Give online through our secure portal; books and church ministry resources available.  
+            - Watch videos and pictures of events worldwide, meet friends, share testimonies.  
+            - Speak psalms, hymns, spiritual songs and upload your own songs.  
+            - Read the Bible and download E-books from the commission.  
+            - Listen to 24-hour music ministrations and download TOD Daily prayers.  
+            - Seek and find a C25 or CC3 location near you.  
+            - Quickly report any incidents needing urgent attention.  
+            - Connect globally — features to translate to 7000+ languages.  
+            - Social features similar to Facebook & Instagram for Christians.
+            """)
+        with col2:
+            st.image("https://placekitten.com/400/400", caption="Community Outreach", use_column_width=True)
         st.markdown("---")
     
     # --------- FIELD ENTRY ----------
     elif submenu == "Field Entry":
         st.header("✍️ Field Data Entry")
-        st.write("Fill in the details below (form is not functional in this UI-only demo).")
         with st.form("field_form"):
             col1, col2 = st.columns(2)
             with col1:
@@ -68,25 +94,28 @@ if section == "Newcomer":
     # --------- MEDIA & RESOURCES ----------
     elif submenu == "Media & Resources":
         st.header("🎥 Media & Resources")
-        st.write("Access videos, pictures, songs, and e-books from the ministry.")
-        st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")  # Example video
-        st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")  # Example audio
-        st.button("Upload Your Song / Resource")
-        st.markdown("Downloadable e-books and daily prayers coming soon!")
+        col1, col2 = st.columns([2,1])
+        with col1:
+            st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
+            st.button("Upload Your Song / Resource")
+            st.markdown("Downloadable e-books and daily prayers coming soon!")
+        with col2:
+            st.image("https://placekitten.com/300/300", caption="Community Media", use_column_width=True)
     
     # --------- LOCATIONS ----------
     elif submenu == "Locations":
         st.header("📍 Find a C25 or CC3 Location")
-        st.write("Search for nearby ministry locations.")
         st.text_input("Enter City / Area")
         st.button("Search Locations")
+        st.info("Locations will appear here in future versions.")
     
     # --------- REPORT INCIDENT ----------
     elif submenu == "Report an Incident":
         st.header("🚨 Report an Incident")
-        st.write("Quickly report any incidents affecting community members.")
         st.text_area("Describe the Incident", height=150)
         st.button("Submit Report 🧡")
+        st.info("All reports are monitored by Admins.")
 
 # ------------------------
 # ADMIN SECTION (EMAIL LOGIN)
