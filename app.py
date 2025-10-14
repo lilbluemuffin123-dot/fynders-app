@@ -72,8 +72,10 @@ if section == "Newcomer":
             st.markdown("**Daily Bible Verse:**")
             st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11")
         with col2:
-            st.image("https://images.unsplash.com/photo-1603133872877-96c4a4f64ebd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTR8fGJpYmxlfGVufDB8fDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400", 
-                     caption="Community Outreach", use_container_width=True)
+            st.image(
+                "https://images.unsplash.com/photo-1603133872877-96c4a4f64ebd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTR8fGJpYmxlfGVufDB8fDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400", 
+                caption="Community Outreach", use_container_width=True
+            )
         st.markdown("---")
     
     # --------- FIELD ENTRY ----------
@@ -99,14 +101,20 @@ if section == "Newcomer":
         st.header("🎥 Media & Resources")
         col1, col2 = st.columns([2,1])
         with col1:
-            st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            st.video("https://www.youtube.com/watch?v=F0OzffuqASQ")
             st.audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
             st.button("Upload Your Song / Resource")
             st.markdown("Downloadable e-books, daily prayers, and Bible study materials coming soon!")
             st.markdown("**Featured Bible Images:**")
-            st.image("https://images.unsplash.com/photo-1596690934914-210c8ef9f67e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8Y2hyaXN0aWFuJTIwYmlibGV8ZW58MHwwfDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400", use_container_width=True)
+            st.image(
+                "https://images.unsplash.com/photo-1596690934914-210c8ef9f67e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8NXx8Y2hyaXN0aWFuJTIwYmlibGV8ZW58MHwwfDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=400",
+                use_container_width=True
+            )
         with col2:
-            st.image("https://images.unsplash.com/photo-1586880244406-6d9d2b5d26c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2hyaXN0aWFuJTIwbWluaXN0cnl8ZW58MHwwfDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=300", caption="Community Media", use_container_width=True)
+            st.image(
+                "https://images.unsplash.com/photo-1586880244406-6d9d2b5d26c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMjA3fDB8MHxzZWFyY2h8OHx8Y2hyaXN0aWFuJTIwbWluaXN0cnl8ZW58MHwwfDB8fA%3D%3D&ixlib=rb-4.0.3&q=80&w=300", 
+                caption="Community Media", use_container_width=True
+            )
     
     # --------- LOCATIONS ----------
     elif submenu == "Locations":
