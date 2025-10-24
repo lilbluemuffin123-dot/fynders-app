@@ -131,18 +131,41 @@ elif page == "Field Entry":
     with st.form("field_form"):
         col1, col2 = st.columns(2)
         with col1:
-            st.text_input("Full Name")
-            st.text_input("Contact Info (Phone/Email)")
-            st.text_input("Location (City / Area)")
+            full_name = st.text_input("Full Name")
+            contact_info = st.text_input("Contact Info (Phone/Email)")
+            location = st.text_input("Location (City / Area)")
         with col2:
-            st.multiselect(
+            needs = st.multiselect(
                 "Needs / Requests",
                 ["Follow-Up", "Welfare – Food", "Counselling", "Prayer", "Bible Materials", "Visit"],
                 default=["Follow-Up"]
             )
-            st.text_area("Notes / Additional Details", height=120)
-        st.form_submit_button("Submit Entry 🧡")
+            notes = st.text_area("Notes / Additional Details", height=120)
+        submitted = st.form_submit_button("Submit Entry 🧡")
+        
+        if submitted:
+            import datetime
+            import os
 
+            # Prepare data to save
+            entry = {
+                "Full Name": full_name,
+                "Contact Info": contact_info,
+                "Location": location,
+                "Needs": ", ".join(needs),
+                "Notes": notes,
+                "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+
+            # Append to CSV
+            file_path = "field_entries.csv"
+            df_new = pd.DataFrame([entry])
+            if os.path.exists(file_path):
+                df_new.to_csv(file_path, mode='a', index=False, header=False)
+            else:
+                df_new.to_csv(file_path, index=False)
+
+            st.success("✅ Entry submitted successfully!")
 # --------- MEDIA & RESOURCES ----------
 elif page == "Media & Resources":
     st.header("🎥 Media & Resources")
@@ -179,23 +202,18 @@ elif page == "Christian Feed":
     for post in posts:
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
-# --------- ADMIN DASHBOARD ----------
-elif page == "Admin":
+# --------- ADMIN DASHBOARD ----------elif page == "Admin":
     st.header("📋 Admin Dashboard")
     email = st.text_input("Enter your admin email")
     
     if email.endswith("@c25.com") and email != "":
         st.header("📋 Admin Dashboard – Follow-Up Overview")
-        st.info("This is a sample data preview.")
-        sample_data = pd.DataFrame({
-            "Name": ["John Doe", "Mary Faith"],
-            "Location": ["Toronto", "New York"],
-            "Needs": ["Counselling, Prayer", "Welfare – Food"],
-            "Assigned To": ["Samuel Hope", "Grace Light"],
-            "Status": ["Assigned", "In Progress"],
-            "Date": ["2025-10-12 09:15", "2025-10-12 10:30"]
-        })
-        st.dataframe(sample_data, use_container_width=True)
+        if os.path.exists("field_entries.csv"):
+            entries_df = pd.read_csv("field_entries.csv")
+            st.dataframe(entries_df, use_container_width=True)
+        else:
+            st.info("No field entries submitted yet.")
+            
     elif email != "":
         st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
 
