@@ -203,18 +203,23 @@ elif page == "Christian Feed":
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
 # --------- ADMIN DASHBOARD ----------elif page == "Admin":
+# --------- ADMIN DASHBOARD ----------
+elif page == "Admin":
+    import os  # ensure os is imported
     st.header("📋 Admin Dashboard")
     email = st.text_input("Enter your admin email")
     
-    if email.endswith("@c25.com") and email != "":
-        st.header("📋 Admin Dashboard – Follow-Up Overview")
-        if os.path.exists("field_entries.csv"):
-            entries_df = pd.read_csv("field_entries.csv")
-            st.dataframe(entries_df, use_container_width=True)
+    if email != "":
+        if email.endswith("@c25.com"):
+            st.header("📋 Admin Dashboard – Follow-Up Overview")
+            file_path = "field_entries.csv"
+            if os.path.exists(file_path):
+                entries_df = pd.read_csv(file_path)
+                if entries_df.empty:
+                    st.info("No field entries submitted yet.")
+                else:
+                    st.dataframe(entries_df, use_container_width=True)
+            else:
+                st.info("No field entries submitted yet.")
         else:
-            st.info("No field entries submitted yet.")
-            
-    elif email != "":
-        st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
-
-
+            st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
