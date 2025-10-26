@@ -59,21 +59,21 @@ p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
 """, unsafe_allow_html=True)
 
 # ------------------------
-# HOME PAGE
-# ------------------------
-st.title("✨ FYNDERS — Field Outreach App")
-st.subheader("Connecting Christians Worldwide")
-st.markdown("Select a section below to get started:")
-
-# ------------------------
 # SESSION STATE
 # ------------------------
 if "page" not in st.session_state:
     st.session_state.page = "Home"
 
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
+
 # ------------------------
-# MAIN BUTTONS
+# HEADER & NAV BUTTONS
 # ------------------------
+st.title("✨ FYNDERS — Field Outreach App")
+st.subheader("Connecting Christians Worldwide")
+st.markdown("Select a section below to get started:")
+
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🏠 Home"):
@@ -98,7 +98,7 @@ with col2:
         st.session_state.page = "Admin"
 
 # ------------------------
-# PAGES
+# PAGE SWITCHING
 # ------------------------
 page = st.session_state.page
 
@@ -117,7 +117,7 @@ if page == "Home":
     - Connect globally — translations to 7000+ languages.  
     """)
     st.markdown("**Daily Bible Verse:**")
-    st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you.” — Jeremiah 29:11", icon="📖")
+    st.info("“For I know the plans I have for you,” declares the Lord — Jeremiah 29:11", icon="📖")
 
 # --------- FIELD ENTRY ----------
 elif page == "Field Entry":
@@ -189,55 +189,65 @@ elif page == "Christian Feed":
     for post in posts:
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
-# --------- WORD OF WEEK ----------
+# --------- WORD OF WEEK (ADMIN ONLY) ----------
 elif page == "Word of Week":
     st.header("📜 Word of the Week")
-    st.info("Admins can upload the weekly lecture here (PDF, text, or image).")
+    email = st.text_input("Enter your admin email to upload Word of the Week")
+    if email and email.endswith("@c25.com"):
+        st.session_state.is_admin = True
+    elif email and not email.endswith("@c25.com"):
+        st.warning("❌ Invalid email. Must end with @c25.com")
 
-    uploaded_file = st.file_uploader("Upload Lecture of the Week (PDF/Text/Image)", type=["pdf", "txt", "jpg", "png"])
-    if uploaded_file:
-        uploads_dir = "word_of_week_uploads"
-        os.makedirs(uploads_dir, exist_ok=True)
-        file_path = os.path.join(uploads_dir, uploaded_file.name)
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        st.success(f"✅ Uploaded successfully: {uploaded_file.name}")
+    if st.session_state.is_admin:
+        uploaded_file = st.file_uploader("Upload Lecture (PDF/Text/Image)", type=["pdf", "txt", "jpg", "png"])
+        if uploaded_file:
+            uploads_dir = "word_of_week_uploads"
+            os.makedirs(uploads_dir, exist_ok=True)
+            file_path = os.path.join(uploads_dir, uploaded_file.name)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            st.success(f"✅ Uploaded successfully: {uploaded_file.name}")
 
-    if os.path.exists("word_of_week_uploads"):
-        files = os.listdir("word_of_week_uploads")
-        if files:
-            st.subheader("📚 Current Word of the Week Files")
-            for f in files:
+        if os.path.exists("word_of_week_uploads"):
+            st.subheader("📚 Available Lectures")
+            for f in os.listdir("word_of_week_uploads"):
                 st.markdown(f"- {f}")
+    else:
+        st.info("🔒 Admin access required to upload or view Word of the Week.")
 
-# --------- TABERNACLE OF DAVID ----------
+# --------- TABERNACLE OF DAVID (ADMIN ONLY) ----------
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
-    st.info("Admins can upload worship materials and devotionals here (PDF only).")
+    email = st.text_input("Enter your admin email to upload materials")
+    if email and email.endswith("@c25.com"):
+        st.session_state.is_admin = True
+    elif email and not email.endswith("@c25.com"):
+        st.warning("❌ Invalid email. Must end with @c25.com")
 
-    pdf_file = st.file_uploader("Upload PDF", type=["pdf"])
-    if pdf_file:
-        tod_dir = "tabernacle_of_david"
-        os.makedirs(tod_dir, exist_ok=True)
-        file_path = os.path.join(tod_dir, pdf_file.name)
-        with open(file_path, "wb") as f:
-            f.write(pdf_file.getbuffer())
-        st.success(f"✅ PDF uploaded successfully: {pdf_file.name}")
+    if st.session_state.is_admin:
+        pdf_file = st.file_uploader("Upload PDF (Devotional/Worship Material)", type=["pdf"])
+        if pdf_file:
+            tod_dir = "tabernacle_of_david"
+            os.makedirs(tod_dir, exist_ok=True)
+            file_path = os.path.join(tod_dir, pdf_file.name)
+            with open(file_path, "wb") as f:
+                f.write(pdf_file.getbuffer())
+            st.success(f"✅ PDF uploaded successfully: {pdf_file.name}")
 
-    if os.path.exists("tabernacle_of_david"):
-        pdfs = os.listdir("tabernacle_of_david")
-        if pdfs:
-            st.subheader("📂 Available Tabernacle of David Files")
-            for pdf in pdfs:
+        if os.path.exists("tabernacle_of_david"):
+            st.subheader("📂 Available Tabernacle Files")
+            for pdf in os.listdir("tabernacle_of_david"):
                 st.markdown(f"- {pdf}")
+    else:
+        st.info("🔒 Admin access required to upload or view Tabernacle of David materials.")
 
 # --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
     email = st.text_input("Enter your admin email")
-
     if email:
         if email.endswith("@c25.com"):
+            st.session_state.is_admin = True
             st.header("📋 Admin Dashboard – Follow-Up Overview")
             file_path = "field_entries.csv"
             if os.path.exists(file_path):
