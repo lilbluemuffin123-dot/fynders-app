@@ -177,18 +177,25 @@ elif page == "Media & Resources":
     st.markdown("Downloadable e-books, daily prayers, and Bible study materials coming soon!")
 
 # ------------------------
+# ------------------------
 # LOCATIONS
 # ------------------------
 elif page == "Locations":
     st.header("📍 Find a C25 or CC3 Location")
-    
-    # Always use the office address
+
+    # Office info
     office_address = "135 W 56th Street, New York, New York 10019, 9TH Floor"
-    
+    latitude = 40.7651
+    longitude = -73.9819
+
     user_input = st.text_input("Enter City / Area")
     if st.button("Search Locations"):
-        # Display only the office address regardless of input
+        # Display address
         st.success(f"📍 Our Office Location:\n{office_address}")
+
+        # Display map
+        st.map(pd.DataFrame([[latitude, longitude]], columns=["lat", "lon"]))
+
 
 # ------------------------
 # REPORT INCIDENT
