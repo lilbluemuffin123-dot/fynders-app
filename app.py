@@ -121,6 +121,7 @@ if page == "Home":
 # ------------------------
 # FIELD ENTRY
 # ------------------------
+# --------- FIELD ENTRY ----------
 elif page == "Field Entry":
     st.header("✍️ Field Entry")
     with st.form("field_form"):
@@ -138,6 +139,7 @@ elif page == "Field Entry":
             notes = st.text_area("Notes / Additional Details", height=120)
         submitted = st.form_submit_button("Submit Entry 🧡")
         if submitted:
+            import datetime
             entry = {
                 "Full Name": full_name,
                 "Contact Info": contact_info,
@@ -147,12 +149,22 @@ elif page == "Field Entry":
                 "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             file_path = "field_entries.csv"
+            backup_path = "field_entries_backup.csv"
             df_new = pd.DataFrame([entry])
+
+            # Save main CSV
             if os.path.exists(file_path):
                 df_new.to_csv(file_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(file_path, index=False)
-            st.success("✅ Entry submitted successfully!")
+
+            # Always update backup CSV
+            if os.path.exists(backup_path):
+                df_new.to_csv(backup_path, mode='a', index=False, header=False)
+            else:
+                df_new.to_csv(backup_path, index=False)
+
+            st.success("✅ Entry submitted successfully and saved securely!")
 
 # ------------------------
 # MEDIA & RESOURCES
@@ -254,15 +266,29 @@ elif page == "Tabernacle of David":
 # ------------------------
 # ADMIN DASHBOARD
 # ------------------------
+# --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
-    if is_admin:
-        file_path = "field_entries.csv"
-        if os.path.exists(file_path):
-            entries_df = pd.read_csv(file_path)
-            if entries_df.empty: st.info("No field entries submitted yet.")
-            else: st.dataframe(entries_df,use_container_width=True)
+    email = st.text_input("Enter your admin email")
+    if email:
+        if email.endswith("@c25.com"):
+            st.session_state.is_admin = True
+            st.header("📋 Admin Dashboard – Follow-Up Overview")
+            file_path = "field_entries.csv"
+            backup_path = "field_entries_backup.csv"
+
+            # Read main CSV, if missing, try backup
+            if os.path.exists(file_path):
+                entries_df = pd.read_csv(file_path)
+            elif os.path.exists(backup_path):
+                entries_df = pd.read_csv(backup_path)
+                st.warning("⚠️ Main CSV missing. Loaded from backup.")
+            else:
+                entries_df = pd.DataFrame()
+
+            if entries_df.empty:
+                st.info("No field entries submitted yet.")
+            else:
+                st.dataframe(entries_df, use_container_width=True)
         else:
-            st.info("No field entries submitted yet.")
-    else:
-        st.warning("❌ Invalid access. Admins only.")
+            st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
