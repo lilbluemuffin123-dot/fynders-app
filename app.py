@@ -25,7 +25,7 @@ body, .stApp, .block-container, .main {
     color: white;
     font-family: 'Helvetica', sans-serif;
 }
-a {color: white !important; text-decoration: none;}
+a {color: white !important; text-decoration: underline;}
 p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
 .stButton>button {
     background: linear-gradient(90deg, #ffb84d, #ff6b00);
@@ -189,9 +189,11 @@ elif page == "Christian Feed":
     for post in posts:
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
-# --------- WORD OF WEEK (ADMIN ONLY) ----------
+# --------- WORD OF WEEK ----------
 elif page == "Word of Week":
     st.header("📜 Word of the Week")
+
+    # Admin upload
     email = st.text_input("Enter your admin email to upload Word of the Week")
     if email and email.endswith("@c25.com"):
         st.session_state.is_admin = True
@@ -208,16 +210,21 @@ elif page == "Word of Week":
                 f.write(uploaded_file.getbuffer())
             st.success(f"✅ Uploaded successfully: {uploaded_file.name}")
 
-        if os.path.exists("word_of_week_uploads"):
-            st.subheader("📚 Available Lectures")
-            for f in os.listdir("word_of_week_uploads"):
+    # Publicly visible PDFs
+    if os.path.exists("word_of_week_uploads"):
+        st.subheader("📚 Available Lectures (Public Access)")
+        for f in os.listdir("word_of_week_uploads"):
+            file_path = os.path.join("word_of_week_uploads", f)
+            if f.lower().endswith(".pdf"):
+                st.markdown(f"📄 [View {f}](./{file_path})", unsafe_allow_html=True)
+            else:
                 st.markdown(f"- {f}")
-    else:
-        st.info("🔒 Admin access required to upload or view Word of the Week.")
 
-# --------- TABERNACLE OF DAVID (ADMIN ONLY) ----------
+# --------- TABERNACLE OF DAVID ----------
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
+
+    # Admin upload
     email = st.text_input("Enter your admin email to upload materials")
     if email and email.endswith("@c25.com"):
         st.session_state.is_admin = True
@@ -234,12 +241,14 @@ elif page == "Tabernacle of David":
                 f.write(pdf_file.getbuffer())
             st.success(f"✅ PDF uploaded successfully: {pdf_file.name}")
 
-        if os.path.exists("tabernacle_of_david"):
-            st.subheader("📂 Available Tabernacle Files")
-            for pdf in os.listdir("tabernacle_of_david"):
+    # Publicly visible PDFs
+    if os.path.exists("tabernacle_of_david"):
+        st.subheader("📂 Available Tabernacle Files (Public Access)")
+        for pdf in os.listdir("tabernacle_of_david"):
+            if pdf.lower().endswith(".pdf"):
+                st.markdown(f"📄 [View {pdf}](./tabernacle_of_david/{pdf})", unsafe_allow_html=True)
+            else:
                 st.markdown(f"- {pdf}")
-    else:
-        st.info("🔒 Admin access required to upload or view Tabernacle of David materials.")
 
 # --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
