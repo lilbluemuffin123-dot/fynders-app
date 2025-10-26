@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 # ------------------------
 # APP CONFIG
@@ -16,23 +17,16 @@ st.set_page_config(
 # ------------------------
 st.markdown("""
 <style>
-/* Hide Streamlit default menu, footer, header */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-
-/* Full page background */
 body, .stApp, .block-container, .main {
     background: linear-gradient(135deg, #ff9f43, #ff6b00);
     color: white;
     font-family: 'Helvetica', sans-serif;
 }
-
-/* All text white */
 a {color: white !important; text-decoration: none;}
 p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
-
-/* Buttons */
 .stButton>button {
     background: linear-gradient(90deg, #ffb84d, #ff6b00);
     color: white;
@@ -47,28 +41,20 @@ p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
     transform: scale(1.05);
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-
-/* Feed posts and tables styling */
 .stDataFrame, .stMarkdown {
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.08);
     padding: 15px;
     margin-bottom: 20px;
 }
-
-/* Cards for feed posts */
 .card {
     border-radius: 15px;
     background: rgba(255,255,255,0.05);
     padding: 15px;
     margin-bottom: 20px;
 }
-
-/* Sidebar styling */
 .css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
-.stTextInput>div>div>input {
-    color: black;
-}
+.stTextInput>div>div>input {color: black;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -79,11 +65,15 @@ st.title("✨ FYNDERS — Field Outreach App")
 st.subheader("Connecting Christians Worldwide")
 st.markdown("Select a section below to get started:")
 
-# Session state to track current page
+# ------------------------
+# SESSION STATE
+# ------------------------
 if "page" not in st.session_state:
     st.session_state.page = "Home"
 
-# Main buttons
+# ------------------------
+# MAIN BUTTONS
+# ------------------------
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🏠 Home"):
@@ -94,12 +84,16 @@ with col1:
         st.session_state.page = "Media & Resources"
     if st.button("📍 Locations"):
         st.session_state.page = "Locations"
+    if st.button("📜 Word of Week"):
+        st.session_state.page = "Word of Week"
 
 with col2:
     if st.button("🚨 Report an Incident"):
         st.session_state.page = "Report Incident"
     if st.button("📖 Christian Feed"):
         st.session_state.page = "Christian Feed"
+    if st.button("🏛 Tabernacle of David"):
+        st.session_state.page = "Tabernacle of David"
     if st.button("📋 Admin Dashboard"):
         st.session_state.page = "Admin"
 
@@ -108,14 +102,14 @@ with col2:
 # ------------------------
 page = st.session_state.page
 
-# --------- HOME PAGE ----------
+# --------- HOME ----------
 if page == "Home":
     st.header("🌍 Connecting Christians Worldwide")
     st.markdown("""
     **Features at your fingertips:**  
     - Give online securely; access church ministry resources.  
     - Watch videos and pictures of worship, events, and community outreach.  
-    - Speak psalms, hymns, spiritual songs and upload your own songs.  
+    - Speak psalms, hymns, and spiritual songs and upload your own songs.  
     - Read the Bible and download e-books from the commission.  
     - Listen to 24-hour worship music and download TOD Daily prayers.  
     - Find a C25 or CC3 location near you.  
@@ -123,7 +117,7 @@ if page == "Home":
     - Connect globally — translations to 7000+ languages.  
     """)
     st.markdown("**Daily Bible Verse:**")
-    st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future.” — Jeremiah 29:11", icon="📖")
+    st.info("“For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you.” — Jeremiah 29:11", icon="📖")
 
 # --------- FIELD ENTRY ----------
 elif page == "Field Entry":
@@ -142,12 +136,8 @@ elif page == "Field Entry":
             )
             notes = st.text_area("Notes / Additional Details", height=120)
         submitted = st.form_submit_button("Submit Entry 🧡")
-        
         if submitted:
             import datetime
-            import os
-
-            # Prepare data to save
             entry = {
                 "Full Name": full_name,
                 "Contact Info": contact_info,
@@ -156,17 +146,15 @@ elif page == "Field Entry":
                 "Notes": notes,
                 "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-
-            # Append to CSV
             file_path = "field_entries.csv"
             df_new = pd.DataFrame([entry])
             if os.path.exists(file_path):
                 df_new.to_csv(file_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(file_path, index=False)
-
             st.success("✅ Entry submitted successfully!")
-# --------- MEDIA & RESOURCES ----------
+
+# --------- MEDIA ----------
 elif page == "Media & Resources":
     st.header("🎥 Media & Resources")
     st.video("https://www.youtube.com/watch?v=F0OzffuqASQ")
@@ -191,7 +179,6 @@ elif page == "Report Incident":
 # --------- CHRISTIAN FEED ----------
 elif page == "Christian Feed":
     st.header("📖 Christian Feed")
-    st.markdown("A feed of Bible verses and inspirational posts from the community.")
     posts = [
         {"verse": "Psalm 23:1-2", "text": "The Lord is my shepherd; I shall not want."},
         {"verse": "John 3:16", "text": "For God so loved the world that He gave His only Son."},
@@ -202,14 +189,54 @@ elif page == "Christian Feed":
     for post in posts:
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
-# --------- ADMIN DASHBOARD ----------elif page == "Admin":
+# --------- WORD OF WEEK ----------
+elif page == "Word of Week":
+    st.header("📜 Word of the Week")
+    st.info("Admins can upload the weekly lecture here (PDF, text, or image).")
+
+    uploaded_file = st.file_uploader("Upload Lecture of the Week (PDF/Text/Image)", type=["pdf", "txt", "jpg", "png"])
+    if uploaded_file:
+        uploads_dir = "word_of_week_uploads"
+        os.makedirs(uploads_dir, exist_ok=True)
+        file_path = os.path.join(uploads_dir, uploaded_file.name)
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.success(f"✅ Uploaded successfully: {uploaded_file.name}")
+
+    if os.path.exists("word_of_week_uploads"):
+        files = os.listdir("word_of_week_uploads")
+        if files:
+            st.subheader("📚 Current Word of the Week Files")
+            for f in files:
+                st.markdown(f"- {f}")
+
+# --------- TABERNACLE OF DAVID ----------
+elif page == "Tabernacle of David":
+    st.header("🏛 Tabernacle of David")
+    st.info("Admins can upload worship materials and devotionals here (PDF only).")
+
+    pdf_file = st.file_uploader("Upload PDF", type=["pdf"])
+    if pdf_file:
+        tod_dir = "tabernacle_of_david"
+        os.makedirs(tod_dir, exist_ok=True)
+        file_path = os.path.join(tod_dir, pdf_file.name)
+        with open(file_path, "wb") as f:
+            f.write(pdf_file.getbuffer())
+        st.success(f"✅ PDF uploaded successfully: {pdf_file.name}")
+
+    if os.path.exists("tabernacle_of_david"):
+        pdfs = os.listdir("tabernacle_of_david")
+        if pdfs:
+            st.subheader("📂 Available Tabernacle of David Files")
+            for pdf in pdfs:
+                st.markdown(f"- {pdf}")
+
 # --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
-    import os  # ensure os is imported
     st.header("📋 Admin Dashboard")
     email = st.text_input("Enter your admin email")
-    
-    if email != "":
+
+    if email:
         if email.endswith("@c25.com"):
             st.header("📋 Admin Dashboard – Follow-Up Overview")
             file_path = "field_entries.csv"
