@@ -181,9 +181,14 @@ elif page == "Media & Resources":
 # ------------------------
 elif page == "Locations":
     st.header("📍 Find a C25 or CC3 Location")
-    st.text_input("Enter City / Area")
-    st.button("Search Locations")
-    st.info("Locations will appear here in future versions.")
+    
+    # Always use the office address
+    office_address = "135 W 56th Street, New York, New York 10019, 9TH Floor"
+    
+    user_input = st.text_input("Enter City / Area")
+    if st.button("Search Locations"):
+        # Display only the office address regardless of input
+        st.success(f"📍 Our Office Location:\n{office_address}")
 
 # ------------------------
 # REPORT INCIDENT
