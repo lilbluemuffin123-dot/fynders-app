@@ -45,6 +45,8 @@ DB_FILE = "uploads_db.csv"
 # Load previous uploads
 if os.path.exists(DB_FILE):
     db = pd.read_csv(DB_FILE)
+    if not db.empty:
+        db['timestamp'] = pd.to_datetime(db['timestamp'], errors='coerce')
 else:
     db = pd.DataFrame(columns=["type","file_path","text","timestamp"])
 
@@ -121,7 +123,6 @@ if page == "Home":
 # ------------------------
 # FIELD ENTRY
 # ------------------------
-# --------- FIELD ENTRY ----------
 elif page == "Field Entry":
     st.header("✍️ Field Entry")
     with st.form("field_form"):
@@ -139,7 +140,6 @@ elif page == "Field Entry":
             notes = st.text_area("Notes / Additional Details", height=120)
         submitted = st.form_submit_button("Submit Entry 🧡")
         if submitted:
-            import datetime
             entry = {
                 "Full Name": full_name,
                 "Contact Info": contact_info,
@@ -177,25 +177,17 @@ elif page == "Media & Resources":
     st.markdown("Downloadable e-books, daily prayers, and Bible study materials coming soon!")
 
 # ------------------------
-# ------------------------
 # LOCATIONS
 # ------------------------
 elif page == "Locations":
     st.header("📍 Find a C25 or CC3 Location")
-
-    # Office info
     office_address = "135 W 56th Street, New York, New York 10019, 9TH Floor"
     latitude = 40.7651
     longitude = -73.9819
-
     user_input = st.text_input("Enter City / Area")
     if st.button("Search Locations"):
-        # Display address
         st.success(f"📍 Our Office Location:\n{office_address}")
-
-        # Display map
         st.map(pd.DataFrame([[latitude, longitude]], columns=["lat", "lon"]))
-
 
 # ------------------------
 # REPORT INCIDENT
@@ -227,27 +219,32 @@ elif page == "Christian Feed":
 elif page == "Word of Week":
     st.header("📖 Word of the Week")
     word_files = db[db['type'] == "word_of_week"]
+    latest_file_path = None
     if not word_files.empty:
-        latest = word_files.iloc[-1]
-        file_path = latest['file_path']
-        file_ext = os.path.splitext(file_path)[1].lower()
+        latest = word_files.sort_values("timestamp").iloc[-1]
+        latest_file_path = latest['file_path']
+        file_ext = os.path.splitext(latest_file_path)[1].lower()
         if file_ext == ".pdf":
-            st.markdown(get_download_link(file_path, "Download PDF"), unsafe_allow_html=True)
-        elif file_ext in [".png",".jpg",".jpeg"]:
-            st.image(file_path, caption="Word of the Week Image", use_container_width=True)
-            st.markdown(get_download_link(file_path, "Download Image"), unsafe_allow_html=True)
+            st.markdown(get_download_link(latest_file_path, "Download PDF"), unsafe_allow_html=True)
+        elif file_ext in [".png", ".jpg", ".jpeg"]:
+            st.image(latest_file_path, caption="Word of the Week Image", use_container_width=True)
+            st.markdown(get_download_link(latest_file_path, "Download Image"), unsafe_allow_html=True)
         else:
-            with open(file_path, "r", encoding="utf-8") as f: st.text(f.read())
-            st.markdown(get_download_link(file_path, "Download Text File"), unsafe_allow_html=True)
+            with open(latest_file_path, "r", encoding="utf-8") as f: st.text(f.read())
+            st.markdown(get_download_link(latest_file_path, "Download Text File"), unsafe_allow_html=True)
     else:
         st.info("No Word of the Week uploaded yet.")
 
     if is_admin:
-        upload = st.file_uploader("Upload Word of the Week (PDF/Image/Text)", type=["pdf","png","jpg","jpeg","txt"])
+        upload = st.file_uploader(
+            "Upload Word of the Week (PDF/Image/Text)", 
+            type=["pdf","png","jpg","jpeg","txt"],
+            key="word_upload",
+            help="Current: " + (os.path.basename(latest_file_path) if latest_file_path else "None")
+        )
         if upload:
             save_path = os.path.join(UPLOAD_DIR, upload.name)
             with open(save_path, "wb") as f: f.write(upload.read())
-            # save to CSV db
             new_row = {"type":"word_of_week","file_path":save_path,"text":"","timestamp":datetime.datetime.now()}
             db = pd.concat([db, pd.DataFrame([new_row])], ignore_index=True)
             db.to_csv(DB_FILE,index=False)
@@ -259,14 +256,21 @@ elif page == "Word of Week":
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
     tab_files = db[db['type'] == "tabernacle"]
+    latest_file_path = None
     if not tab_files.empty:
-        latest = tab_files.iloc[-1]
-        st.markdown(get_download_link(latest['file_path'], "Download Tabernacle PDF"), unsafe_allow_html=True)
+        latest = tab_files.sort_values("timestamp").iloc[-1]
+        latest_file_path = latest['file_path']
+        st.markdown(get_download_link(latest_file_path, "Download Tabernacle PDF"), unsafe_allow_html=True)
     else:
         st.info("No Tabernacle uploaded yet.")
 
     if is_admin:
-        upload = st.file_uploader("Upload Tabernacle PDF", type=["pdf"])
+        upload = st.file_uploader(
+            "Upload Tabernacle PDF", 
+            type=["pdf"],
+            key="tab_upload",
+            help="Current: " + (os.path.basename(latest_file_path) if latest_file_path else "None")
+        )
         if upload:
             save_path = os.path.join(UPLOAD_DIR, upload.name)
             with open(save_path, "wb") as f: f.write(upload.read())
@@ -278,7 +282,6 @@ elif page == "Tabernacle of David":
 # ------------------------
 # ADMIN DASHBOARD
 # ------------------------
-# --------- ADMIN DASHBOARD ----------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
     email = st.text_input("Enter your admin email")
@@ -304,3 +307,4 @@ elif page == "Admin":
                 st.dataframe(entries_df, use_container_width=True)
         else:
             st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
+
