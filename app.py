@@ -15,27 +15,68 @@ st.set_page_config(
 )
 
 # ------------------------
-# CUSTOM CSS
+# CUSTOM CSS (Mobile-Friendly)
 # ------------------------
 st.markdown("""
 <style>
+/* Hide default Streamlit menu, footer, and header */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-body, .stApp, .block-container, .main {background: linear-gradient(135deg, #ff9f43, #ff6b00); color: white; font-family: 'Helvetica', sans-serif;}
+
+/* General page background */
+body, .stApp, .block-container, .main {
+    background: linear-gradient(135deg, #ff9f43, #ff6b00);
+    color: white;
+    font-family: 'Helvetica', sans-serif;
+}
+
+/* Links */
 a {color: white !important; text-decoration: none;}
+
+/* Headings, paragraphs, spans */
 p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
-.stButton>button {background: linear-gradient(90deg, #ffb84d, #ff6b00); color: white; font-weight: bold; border-radius: 15px; padding: 15px; font-size: 18px; width: 100%; transition: all 0.2s ease-in-out;}
+
+/* Buttons */
+.stButton>button {
+    background: linear-gradient(90deg, #ffb84d, #ff6b00);
+    color: white;
+    font-weight: bold;
+    border-radius: 15px;
+    padding: 15px;
+    font-size: 16px;
+    width: 100%;
+    transition: all 0.2s ease-in-out;
+}
 .stButton>button:hover {transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-.stDataFrame, .stMarkdown {border-radius: 15px; background: rgba(255, 255, 255, 0.08); padding: 15px; margin-bottom: 20px;}
-.card {border-radius: 15px; background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 20px;}
-.css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
-.stTextInput>div>div>input {color: white;}
-.stTextArea textarea {color: white;}
+
+/* DataFrame & markdown cards */
+.stDataFrame, .stMarkdown, .card {
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+/* Input fields - white text on black for mobile */
+.stTextInput>div>div>input,
+.stTextArea textarea,
+.stNumberInput>div>input {
+    color: white;
+    background-color: black;
+}
+
+/* Chat bubbles */
 .chat-bubble {padding:10px; border-radius:15px; margin:5px; max-width:80%; word-wrap: break-word;}
 .chat-bubble.user {background:#000; text-align:left;}
 .chat-bubble.admin {background:#ffb84d; text-align:right; color:black;}
 .chat-timestamp {font-size:10px; opacity:0.7;}
+
+/* Make columns stack on mobile */
+@media only screen and (max-width: 768px) {
+    .stColumns {flex-direction: column;}
+    .stButton>button {font-size:14px; padding:12px;}
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -69,9 +110,9 @@ if email_input:
     st.session_state.email = email_input
     st.session_state.is_admin = email_input.lower().endswith("@c25.com")
     if st.session_state.is_admin:
-        st.sidebar.success(f"✅ Logged in as Admin: {email_input}")
+        st.sidebar.success(f"✅ Admin: {email_input}")
     else:
-        st.sidebar.info(f"👤 Logged in as User: {email_input}")
+        st.sidebar.info(f"👤 User: {email_input}")
 else:
     st.sidebar.warning("Please enter your email to continue.")
 
@@ -79,7 +120,7 @@ email = st.session_state.email
 is_admin = st.session_state.is_admin
 
 # ------------------------
-# NAVIGATION BUTTONS
+# NAVIGATION
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
 st.subheader("Connecting Christians Worldwide")
@@ -164,19 +205,14 @@ elif page == "Field Entry":
             file_path = "field_entries.csv"
             backup_path = "field_entries_backup.csv"
             df_new = pd.DataFrame([entry])
-
-            # Save main CSV
             if os.path.exists(file_path):
                 df_new.to_csv(file_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(file_path, index=False)
-
-            # Always update backup CSV
             if os.path.exists(backup_path):
                 df_new.to_csv(backup_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(backup_path, index=False)
-
             st.success("✅ Entry submitted successfully and saved securely!")
 
 # ------------------------
@@ -227,7 +263,7 @@ elif page == "Christian Feed":
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
 # ------------------------
-# WORD OF THE WEEK PAGE
+# WORD OF THE WEEK
 # ------------------------
 elif page == "Word of Week":
     st.header("📖 Word of the Week")
@@ -264,7 +300,7 @@ elif page == "Word of Week":
             st.success("✅ Word of the Week uploaded successfully!")
 
 # ------------------------
-# TABERNACLE PAGE
+# TABERNACLE
 # ------------------------
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
@@ -293,109 +329,92 @@ elif page == "Tabernacle of David":
             st.success("✅ Tabernacle uploaded successfully!")
 
 # ------------------------
-# PERMANENT INTERNAL CHAT
+# INTERNAL CHAT
 # ------------------------
 elif page == "Internal Chat":
     st.header("💬 Internal Chat")
-    if not email:
-        st.warning("❌ Please log in to access the chat.")
-        st.stop()
-
-    CHAT_FILE = "live_chat.csv"
+    CHAT_FILE = "chat_db.csv"
     if not os.path.exists(CHAT_FILE):
-        pd.DataFrame(columns=["timestamp","user","message"]).to_csv(CHAT_FILE, index=False)
-
-    # Load chat
+        pd.DataFrame(columns=["timestamp","user","message"]).to_csv(CHAT_FILE,index=False)
     chat_df = pd.read_csv(CHAT_FILE)
-    chat_df = chat_df.sort_values("timestamp")
-    st.markdown("<div style='max-height:400px; overflow-y:scroll;'>", unsafe_allow_html=True)
+    
+    # Display messages
     for _, row in chat_df.iterrows():
-        bubble_class = "admin" if row['user'].endswith("@c25.com") else "user"
-        st.markdown(f"""
-        <div class='chat-bubble {bubble_class}'>
-            <strong>{row['user']}</strong>: {row['message']}
-            <div class='chat-timestamp'>{row['timestamp']}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
+        bubble_class = "admin" if row["user"].lower().endswith("@c25.com") else "user"
+        st.markdown(f"<div class='chat-bubble {bubble_class}'><b>{row['user']}</b>: {row['message']}<div class='chat-timestamp'>{row['timestamp']}</div></div>", unsafe_allow_html=True)
+    
     # Send new message
     with st.form("chat_form"):
-        message = st.text_input("Type your message here...")
+        user_message = st.text_input("Enter message")
         send = st.form_submit_button("Send")
-        if send and message:
-            new_message = pd.DataFrame([{
-                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "user": email,
-                "message": message
-            }])
-            new_message.to_csv(CHAT_FILE, mode="a", index=False, header=False)
+        if send and email and user_message.strip() != "":
+            new_msg = pd.DataFrame([{"timestamp":datetime.datetime.now(), "user":email, "message":user_message.strip()}])
+            chat_df = pd.concat([chat_df,new_msg], ignore_index=True)
+            chat_df.to_csv(CHAT_FILE,index=False)
             st.experimental_rerun()
 
 # ------------------------
-# DONATIONS PAGE
+# DONATIONS
 # ------------------------
 elif page == "Donations":
     st.header("💳 Donations / Giving")
-    st.info("Connect your donations securely. Bank integration coming soon.")
-    st.text_input("Enter Amount")
+    st.info("Secure giving coming soon! Connects directly to bank account.")
+    st.number_input("Amount to donate", min_value=1, step=1, key="donation_amount")
+    st.text_input("Name on Card / Account", key="donor_name")
+    st.text_input("Email", key="donor_email")
     st.button("Donate 🧡")
 
 # ------------------------
-# ABOUT US PAGE
+# ABOUT US
 # ------------------------
 elif page == "About Us":
     st.header("ℹ️ About Us")
     st.markdown("""
-    **About Apostle:**  
-    [Write about the Apostle here]  
-
-    **Mission Statement:**  
-    [Write mission statement here]
-    """)
+**Apostle:** Apostle [Name]  
+**Mission Statement:** To connect Christians worldwide, provide spiritual resources, and empower communities through outreach and ministry.
+""")
 
 # ------------------------
-# SERVICES PAGE
+# SERVICES
 # ------------------------
 elif page == "Services":
-    st.header("🛠 Our Services")
+    st.header("🛠 Services")
     st.markdown("""
-    - Community Outreach  
-    - Bible Study & Counseling  
-    - Worship Events  
-    - Field Ministry  
-    """)
+- Counselling & Prayer  
+- Bible Distribution  
+- Community Outreach  
+- Worship & Music Resources  
+- Online Classes and Workshops
+""")
 
 # ------------------------
-# STORE PAGE
+# STORE
 # ------------------------
 elif page == "Store":
     st.header("🛒 Store")
-    st.markdown("Coming soon: Buy books, resources, and merchandise here.")
+    st.markdown("""
+Merchandise, books, and ministry resources coming soon!
+""")
 
 # ------------------------
 # ADMIN DASHBOARD
 # ------------------------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
-    if not is_admin:
-        st.warning("❌ Only admins can access the dashboard.")
-        st.stop()
-
-    st.header("📋 Admin Dashboard – Follow-Up Overview")
-    file_path = "field_entries.csv"
-    backup_path = "field_entries_backup.csv"
-
-    # Read main CSV, if missing, try backup
-    if os.path.exists(file_path):
-        entries_df = pd.read_csv(file_path)
-    elif os.path.exists(backup_path):
-        entries_df = pd.read_csv(backup_path)
-        st.warning("⚠️ Main CSV missing. Loaded from backup.")
+    if is_admin:
+        st.header("📋 Admin Dashboard – Follow-Up Overview")
+        file_path = "field_entries.csv"
+        backup_path = "field_entries_backup.csv"
+        if os.path.exists(file_path):
+            entries_df = pd.read_csv(file_path)
+        elif os.path.exists(backup_path):
+            entries_df = pd.read_csv(backup_path)
+            st.warning("⚠️ Main CSV missing. Loaded from backup.")
+        else:
+            entries_df = pd.DataFrame()
+        if entries_df.empty:
+            st.info("No field entries submitted yet.")
+        else:
+            st.dataframe(entries_df, use_container_width=True)
     else:
-        entries_df = pd.DataFrame()
-
-    if entries_df.empty:
-        st.info("No field entries submitted yet.")
-    else:
-        st.dataframe(entries_df, use_container_width=True)
+        st.warning("❌ Only admins can access this section.")
