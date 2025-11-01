@@ -329,6 +329,9 @@ elif page == "Tabernacle of David":
 # ------------------------
 # INTERNAL LIVE CHAT
 # ------------------------
+# ------------------------
+# INTERNAL LIVE CHAT
+# ------------------------
 elif page == "Internal Chat":
     st.header("💬 Internal Admin Chat")
     if not is_admin:
@@ -339,10 +342,11 @@ elif page == "Internal Chat":
     if not os.path.exists(CHAT_FILE):
         pd.DataFrame(columns=["timestamp","user","message"]).to_csv(CHAT_FILE, index=False)
 
-    auto_refresh_chat(interval_sec=3)  # refresh every 3 seconds
-
+    # --- Load chat ---
     chat_df = pd.read_csv(CHAT_FILE)
-    st.markdown("---")
+    
+    # Scroll chat to show latest messages
+    st.markdown("<div style='max-height:400px; overflow-y:scroll;'>", unsafe_allow_html=True)
     if not chat_df.empty:
         for _, row in chat_df.iterrows():
             bubble_class = "admin" if row['user'].endswith("@c25.com") else "user"
@@ -352,8 +356,9 @@ elif page == "Internal Chat":
                 <div class='chat-timestamp'>{row['timestamp']}</div>
             </div>
             """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("---")
+    # --- Send new message ---
     with st.form("chat_form"):
         message = st.text_input("Type your message here...")
         send = st.form_submit_button("Send")
@@ -364,8 +369,13 @@ elif page == "Internal Chat":
                 "message": message
             }])
             new_message.to_csv(CHAT_FILE, mode="a", index=False, header=False)
-            st.experimental_rerun()
+            st.experimental_rerun()  # rerun only after sending
 
+    # --- Auto-refresh without rerunning while typing ---
+    st_autorefresh = st.empty()
+    if time.time() - st.session_state.get("chat_refresh", 0) > 3:
+        st.session_state["chat_refresh"] = time.time()
+        st_autorefresh.markdown("<meta http-equiv='refresh' content='3'>", unsafe_allow_html=True)
 # ------------------------
 # DONATIONS PAGE
 # ------------------------
