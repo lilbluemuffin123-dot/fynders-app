@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import base64
 import datetime
-from streamlit_autorefresh import st_autorefresh
+import time
 
 # ------------------------
 # CONFIG
@@ -41,6 +41,31 @@ p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
         color: white !important;
     }
 }
+
+/* CHAT BUBBLES */
+.chat-bubble {
+    max-width: 80%;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 15px;
+    display: inline-block;
+    clear: both;
+    word-wrap: break-word;
+}
+.chat-bubble.admin {
+    background-color: #34b7f1;
+    color: white;
+    float: right;
+}
+.chat-bubble.user {
+    background-color: #ece5dd;
+    color: black;
+    float: left;
+}
+.chat-timestamp {
+    font-size: 10px;
+    color: gray;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -63,6 +88,7 @@ else:
 # ------------------------
 if "page" not in st.session_state: st.session_state.page = "Home"
 if "is_admin" not in st.session_state: st.session_state.is_admin = False
+if "chat_refresh" not in st.session_state: st.session_state.chat_refresh = time.time()
 
 # ------------------------
 # LOGIN
@@ -115,6 +141,14 @@ def get_download_link(file_path, label):
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{os.path.basename(file_path)}" style="color:#ffcc70;">📥 {label}</a>'
 
 # ------------------------
+# AUTO-REFRESH CHAT FUNCTION
+# ------------------------
+def auto_refresh_chat(interval_sec=3):
+    if time.time() - st.session_state.chat_refresh > interval_sec:
+        st.session_state.chat_refresh = time.time()
+        st.experimental_rerun()
+
+# ------------------------
 # HOME PAGE
 # ------------------------
 if page == "Home":
@@ -165,11 +199,13 @@ elif page == "Field Entry":
             backup_path = "field_entries_backup.csv"
             df_new = pd.DataFrame([entry])
 
+            # Save main CSV
             if os.path.exists(file_path):
                 df_new.to_csv(file_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(file_path, index=False)
 
+            # Always update backup CSV
             if os.path.exists(backup_path):
                 df_new.to_csv(backup_path, mode='a', index=False, header=False)
             else:
@@ -303,14 +339,19 @@ elif page == "Internal Chat":
     if not os.path.exists(CHAT_FILE):
         pd.DataFrame(columns=["timestamp","user","message"]).to_csv(CHAT_FILE, index=False)
 
-    # Auto-refresh every 3 sec
-    st_autorefresh(interval=3000, key="chat_refresh")
+    auto_refresh_chat(interval_sec=3)  # refresh every 3 seconds
 
     chat_df = pd.read_csv(CHAT_FILE)
     st.markdown("---")
     if not chat_df.empty:
         for _, row in chat_df.iterrows():
-            st.markdown(f"**{row['user']} [{row['timestamp']}]**: {row['message']}")
+            bubble_class = "admin" if row['user'].endswith("@c25.com") else "user"
+            st.markdown(f"""
+            <div class='chat-bubble {bubble_class}'>
+                <strong>{row['user']}</strong>: {row['message']}
+                <div class='chat-timestamp'>{row['timestamp']}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
     st.markdown("---")
     with st.form("chat_form"):
@@ -326,49 +367,45 @@ elif page == "Internal Chat":
             st.experimental_rerun()
 
 # ------------------------
-# DONATIONS / GIVING
+# DONATIONS PAGE
 # ------------------------
 elif page == "Donations":
     st.header("💳 Donations / Giving")
-    st.markdown("Donate securely to support our ministry. Connect your bank account below:")
-    st.text_input("Name on Account")
-    st.text_input("Bank Account Number")
-    st.text_input("Routing Number")
-    st.number_input("Amount", min_value=1)
+    st.info("Connect your donations securely. Bank integration coming soon.")
+    st.text_input("Enter Amount")
     st.button("Donate 🧡")
-    st.info("All donations are processed securely. For full integration, connect a payment processor like Stripe or PayPal.")
 
 # ------------------------
-# ABOUT US
+# ABOUT US PAGE
 # ------------------------
 elif page == "About Us":
     st.header("ℹ️ About Us")
     st.markdown("""
-    **Apostle & Mission:**  
-    Our mission is to connect Christians worldwide and provide spiritual guidance, resources, and support.  
-    Led by Apostle [Name], we aim to spread the Word of God and serve our community through outreach and ministry programs.
+    **About Apostle:**  
+    [Write about the Apostle here]  
+
+    **Mission Statement:**  
+    [Write mission statement here]
     """)
 
 # ------------------------
-# SERVICES
+# SERVICES PAGE
 # ------------------------
 elif page == "Services":
-    st.header("🛠 Services")
+    st.header("🛠 Our Services")
     st.markdown("""
-    **Our Services Include:**  
-    - Spiritual Counseling & Prayer  
-    - Community Outreach Programs  
-    - Bible Study & Resources  
-    - Worship Events & Media  
-    - Support & Welfare Services
+    - Community Outreach  
+    - Bible Study & Counseling  
+    - Worship Events  
+    - Field Ministry  
     """)
 
 # ------------------------
-# STORE
+# STORE PAGE
 # ------------------------
 elif page == "Store":
     st.header("🛒 Store")
-    st.markdown("Coming Soon: Buy ministry merchandise, books, and digital resources directly from our app.")
+    st.markdown("Coming soon: Buy books, resources, and merchandise here.")
 
 # ------------------------
 # ADMIN DASHBOARD
@@ -376,23 +413,25 @@ elif page == "Store":
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
     email_input = st.text_input("Enter your admin email")
-    if email_input and email_input.endswith("@c25.com"):
-        st.session_state.is_admin = True
-        st.header("📋 Admin Dashboard – Follow-Up Overview")
-        file_path = "field_entries.csv"
-        backup_path = "field_entries_backup.csv"
+    if email_input:
+        if email_input.endswith("@c25.com"):
+            st.session_state.is_admin = True
+            st.header("📋 Admin Dashboard – Follow-Up Overview")
+            file_path = "field_entries.csv"
+            backup_path = "field_entries_backup.csv"
 
-        if os.path.exists(file_path):
-            entries_df = pd.read_csv(file_path)
-        elif os.path.exists(backup_path):
-            entries_df = pd.read_csv(backup_path)
-            st.warning("⚠️ Main CSV missing. Loaded from backup.")
-        else:
-            entries_df = pd.DataFrame()
+            # Read main CSV, if missing, try backup
+            if os.path.exists(file_path):
+                entries_df = pd.read_csv(file_path)
+            elif os.path.exists(backup_path):
+                entries_df = pd.read_csv(backup_path)
+                st.warning("⚠️ Main CSV missing. Loaded from backup.")
+            else:
+                entries_df = pd.DataFrame()
 
-        if entries_df.empty:
-            st.info("No field entries submitted yet.")
+            if entries_df.empty:
+                st.info("No field entries submitted yet.")
+            else:
+                st.dataframe(entries_df, use_container_width=True)
         else:
-            st.dataframe(entries_df, use_container_width=True)
-    else:
-        st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
+            st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
