@@ -67,7 +67,7 @@ if "email" not in st.session_state: st.session_state.email = ""
 # MOBILE-FRIENDLY TOP LOGIN
 # ------------------------
 if st.session_state.email == "":
-    st.markdown("### 👋 Please log in")
+    st.markdown("### 👋 Please log in using your @c25.com email")
     email_input_top = st.text_input("Enter your email to continue", key="top_login")
     if email_input_top:
         st.session_state.email = email_input_top
