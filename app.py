@@ -3,7 +3,6 @@ import pandas as pd
 import os
 import base64
 import datetime
-import time
 
 # ------------------------
 # CONFIG
@@ -33,39 +32,10 @@ p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
 .css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
 .stTextInput>div>div>input {color: white;}
 .stTextArea textarea {color: white;}
-
-/* MOBILE VIEW INPUT STYLING */
-@media (max-width: 768px) {
-    .stTextInput>div>div>input, .stTextArea textarea {
-        background-color: black !important;
-        color: white !important;
-    }
-}
-
-/* CHAT BUBBLES */
-.chat-bubble {
-    max-width: 80%;
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 15px;
-    display: inline-block;
-    clear: both;
-    word-wrap: break-word;
-}
-.chat-bubble.admin {
-    background-color: #34b7f1;
-    color: white;
-    float: right;
-}
-.chat-bubble.user {
-    background-color: #ece5dd;
-    color: black;
-    float: left;
-}
-.chat-timestamp {
-    font-size: 10px;
-    color: gray;
-}
+.chat-bubble {padding:10px; border-radius:15px; margin:5px; max-width:80%; word-wrap: break-word;}
+.chat-bubble.user {background:#000; text-align:left;}
+.chat-bubble.admin {background:#ffb84d; text-align:right; color:black;}
+.chat-timestamp {font-size:10px; opacity:0.7;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,24 +58,28 @@ else:
 # ------------------------
 if "page" not in st.session_state: st.session_state.page = "Home"
 if "is_admin" not in st.session_state: st.session_state.is_admin = False
-if "chat_refresh" not in st.session_state: st.session_state.chat_refresh = time.time()
+if "email" not in st.session_state: st.session_state.email = ""
 
 # ------------------------
 # LOGIN
 # ------------------------
 st.sidebar.header("Login")
-email = st.sidebar.text_input("Enter your email")
-is_admin = email.lower().endswith("@c25.com") if email else False
-st.session_state.is_admin = is_admin
-
-if email:
-    if is_admin: st.sidebar.success(f"✅ Logged in as Admin: {email}")
-    else: st.sidebar.info(f"👤 Logged in as Public User: {email}")
+email_input = st.sidebar.text_input("Enter your email")
+if email_input:
+    st.session_state.email = email_input
+    st.session_state.is_admin = email_input.lower().endswith("@c25.com")
+    if st.session_state.is_admin:
+        st.sidebar.success(f"✅ Logged in as Admin: {email_input}")
+    else:
+        st.sidebar.info(f"👤 Logged in as User: {email_input}")
 else:
     st.sidebar.warning("Please enter your email to continue.")
 
+email = st.session_state.email
+is_admin = st.session_state.is_admin
+
 # ------------------------
-# NAVIGATION
+# NAVIGATION BUTTONS
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
 st.subheader("Connecting Christians Worldwide")
@@ -123,7 +97,7 @@ with col2:
     if st.button("📖 Christian Feed"): st.session_state.page = "Christian Feed"
     if st.button("🏛 Tabernacle of David"): st.session_state.page = "Tabernacle of David"
     if st.button("💬 Internal Chat"): st.session_state.page = "Internal Chat"
-    if st.button("💳 Donations / Giving"): st.session_state.page = "Donations"
+    if st.button("💳 Donations"): st.session_state.page = "Donations"
     if st.button("ℹ️ About Us"): st.session_state.page = "About Us"
     if st.button("🛠 Services"): st.session_state.page = "Services"
     if st.button("🛒 Store"): st.session_state.page = "Store"
@@ -139,14 +113,6 @@ def get_download_link(file_path, label):
         data = f.read()
     b64 = base64.b64encode(data).decode()
     return f'<a href="data:application/octet-stream;base64,{b64}" download="{os.path.basename(file_path)}" style="color:#ffcc70;">📥 {label}</a>'
-
-# ------------------------
-# AUTO-REFRESH CHAT FUNCTION
-# ------------------------
-def auto_refresh_chat(interval_sec=3):
-    if time.time() - st.session_state.chat_refresh > interval_sec:
-        st.session_state.chat_refresh = time.time()
-        st.experimental_rerun()
 
 # ------------------------
 # HOME PAGE
@@ -261,7 +227,7 @@ elif page == "Christian Feed":
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
 # ------------------------
-# WORD OF THE WEEK
+# WORD OF THE WEEK PAGE
 # ------------------------
 elif page == "Word of Week":
     st.header("📖 Word of the Week")
@@ -298,7 +264,7 @@ elif page == "Word of Week":
             st.success("✅ Word of the Week uploaded successfully!")
 
 # ------------------------
-# TABERNACLE
+# TABERNACLE PAGE
 # ------------------------
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
@@ -327,38 +293,33 @@ elif page == "Tabernacle of David":
             st.success("✅ Tabernacle uploaded successfully!")
 
 # ------------------------
-# INTERNAL LIVE CHAT
-# ------------------------
-# ------------------------
-# INTERNAL LIVE CHAT
+# PERMANENT INTERNAL CHAT
 # ------------------------
 elif page == "Internal Chat":
-    st.header("💬 Internal Admin Chat")
-    if not is_admin:
-        st.warning("❌ Only admin emails can access this chat.")
+    st.header("💬 Internal Chat")
+    if not email:
+        st.warning("❌ Please log in to access the chat.")
         st.stop()
 
     CHAT_FILE = "live_chat.csv"
     if not os.path.exists(CHAT_FILE):
         pd.DataFrame(columns=["timestamp","user","message"]).to_csv(CHAT_FILE, index=False)
 
-    # --- Load chat ---
+    # Load chat
     chat_df = pd.read_csv(CHAT_FILE)
-    
-    # Scroll chat to show latest messages
+    chat_df = chat_df.sort_values("timestamp")
     st.markdown("<div style='max-height:400px; overflow-y:scroll;'>", unsafe_allow_html=True)
-    if not chat_df.empty:
-        for _, row in chat_df.iterrows():
-            bubble_class = "admin" if row['user'].endswith("@c25.com") else "user"
-            st.markdown(f"""
-            <div class='chat-bubble {bubble_class}'>
-                <strong>{row['user']}</strong>: {row['message']}
-                <div class='chat-timestamp'>{row['timestamp']}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    for _, row in chat_df.iterrows():
+        bubble_class = "admin" if row['user'].endswith("@c25.com") else "user"
+        st.markdown(f"""
+        <div class='chat-bubble {bubble_class}'>
+            <strong>{row['user']}</strong>: {row['message']}
+            <div class='chat-timestamp'>{row['timestamp']}</div>
+        </div>
+        """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- Send new message ---
+    # Send new message
     with st.form("chat_form"):
         message = st.text_input("Type your message here...")
         send = st.form_submit_button("Send")
@@ -369,13 +330,8 @@ elif page == "Internal Chat":
                 "message": message
             }])
             new_message.to_csv(CHAT_FILE, mode="a", index=False, header=False)
-            st.experimental_rerun()  # rerun only after sending
+            st.experimental_rerun()
 
-    # --- Auto-refresh without rerunning while typing ---
-    st_autorefresh = st.empty()
-    if time.time() - st.session_state.get("chat_refresh", 0) > 3:
-        st.session_state["chat_refresh"] = time.time()
-        st_autorefresh.markdown("<meta http-equiv='refresh' content='3'>", unsafe_allow_html=True)
 # ------------------------
 # DONATIONS PAGE
 # ------------------------
@@ -422,26 +378,24 @@ elif page == "Store":
 # ------------------------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
-    email_input = st.text_input("Enter your admin email")
-    if email_input:
-        if email_input.endswith("@c25.com"):
-            st.session_state.is_admin = True
-            st.header("📋 Admin Dashboard – Follow-Up Overview")
-            file_path = "field_entries.csv"
-            backup_path = "field_entries_backup.csv"
+    if not is_admin:
+        st.warning("❌ Only admins can access the dashboard.")
+        st.stop()
 
-            # Read main CSV, if missing, try backup
-            if os.path.exists(file_path):
-                entries_df = pd.read_csv(file_path)
-            elif os.path.exists(backup_path):
-                entries_df = pd.read_csv(backup_path)
-                st.warning("⚠️ Main CSV missing. Loaded from backup.")
-            else:
-                entries_df = pd.DataFrame()
+    st.header("📋 Admin Dashboard – Follow-Up Overview")
+    file_path = "field_entries.csv"
+    backup_path = "field_entries_backup.csv"
 
-            if entries_df.empty:
-                st.info("No field entries submitted yet.")
-            else:
-                st.dataframe(entries_df, use_container_width=True)
-        else:
-            st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
+    # Read main CSV, if missing, try backup
+    if os.path.exists(file_path):
+        entries_df = pd.read_csv(file_path)
+    elif os.path.exists(backup_path):
+        entries_df = pd.read_csv(backup_path)
+        st.warning("⚠️ Main CSV missing. Loaded from backup.")
+    else:
+        entries_df = pd.DataFrame()
+
+    if entries_df.empty:
+        st.info("No field entries submitted yet.")
+    else:
+        st.dataframe(entries_df, use_container_width=True)
