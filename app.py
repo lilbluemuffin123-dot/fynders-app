@@ -32,6 +32,14 @@ p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
 .css-1d391kg {background: linear-gradient(135deg, #ffb84d, #ff6b00); color: white;}
 .stTextInput>div>div>input {color: white;}
 .stTextArea textarea {color: white;}
+
+/* MOBILE VIEW INPUT STYLING */
+@media (max-width: 768px) {
+    .stTextInput>div>div>input, .stTextArea textarea {
+        background-color: black !important;
+        color: white !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,6 +96,11 @@ with col2:
     if st.button("🚨 Report an Incident"): st.session_state.page = "Report Incident"
     if st.button("📖 Christian Feed"): st.session_state.page = "Christian Feed"
     if st.button("🏛 Tabernacle of David"): st.session_state.page = "Tabernacle of David"
+    if st.button("💬 WhatsApp Chat"): st.session_state.page = "WhatsApp Chat"
+    if st.button("💳 Donations / Giving"): st.session_state.page = "Donations"
+    if st.button("ℹ️ About Us"): st.session_state.page = "About Us"
+    if st.button("🛠 Services"): st.session_state.page = "Services"
+    if st.button("🛒 Store"): st.session_state.page = "Store"
     if st.button("📋 Admin Dashboard"): st.session_state.page = "Admin"
 
 page = st.session_state.page
@@ -214,7 +227,7 @@ elif page == "Christian Feed":
         st.markdown(f"<div class='card'><h3>{post['verse']}</h3><p>{post['text']}</p></div>", unsafe_allow_html=True)
 
 # ------------------------
-# WORD OF THE WEEK PAGE
+# WORD OF THE WEEK
 # ------------------------
 elif page == "Word of Week":
     st.header("📖 Word of the Week")
@@ -235,7 +248,7 @@ elif page == "Word of Week":
     else:
         st.info("No Word of the Week uploaded yet.")
 
-    if is_admin:
+    if st.session_state.is_admin:
         upload = st.file_uploader(
             "Upload Word of the Week (PDF/Image/Text)", 
             type=["pdf","png","jpg","jpeg","txt"],
@@ -251,7 +264,7 @@ elif page == "Word of Week":
             st.success("✅ Word of the Week uploaded successfully!")
 
 # ------------------------
-# TABERNACLE PAGE
+# TABERNACLE OF DAVID
 # ------------------------
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
@@ -264,7 +277,7 @@ elif page == "Tabernacle of David":
     else:
         st.info("No Tabernacle uploaded yet.")
 
-    if is_admin:
+    if st.session_state.is_admin:
         upload = st.file_uploader(
             "Upload Tabernacle PDF", 
             type=["pdf"],
@@ -278,6 +291,65 @@ elif page == "Tabernacle of David":
             db = pd.concat([db, pd.DataFrame([new_row])], ignore_index=True)
             db.to_csv(DB_FILE,index=False)
             st.success("✅ Tabernacle uploaded successfully!")
+
+# ------------------------
+# WHATSAPP CHAT
+# ------------------------
+elif page == "WhatsApp Chat":
+    st.header("💬 WhatsApp Chat")
+    st.markdown("""
+    Join our official WhatsApp group to stay connected with other members.  
+    [Click here to join the WhatsApp Group](https://chat.whatsapp.com/example)  
+    Chat, ask questions, share prayer requests, and stay informed.
+    """)
+
+# ------------------------
+# DONATIONS / GIVING
+# ------------------------
+elif page == "Donations":
+    st.header("💳 Donations / Giving")
+    st.markdown("Support the mission securely. Connect with your bank or card for online giving.")
+    st.text_input("Enter Amount")
+    st.selectbox("Choose Payment Method", ["Credit/Debit Card", "Bank Transfer", "PayPal"])
+    st.button("Donate 🧡")
+    st.info("All donations are secure and managed by the church administration.")
+
+# ------------------------
+# ABOUT US
+# ------------------------
+elif page == "About Us":
+    st.header("ℹ️ About Us")
+    st.markdown("""
+    **Apostle John Doe**  
+    Dedicated to spreading the Word of God and empowering Christians worldwide.  
+
+    **Mission Statement:**  
+    To reach every nation with the gospel, provide spiritual guidance, and uplift communities through outreach, education, and prayer.
+    """)
+
+# ------------------------
+# SERVICES
+# ------------------------
+elif page == "Services":
+    st.header("🛠 Services")
+    st.markdown("""
+    - Worship & Prayer Services  
+    - Bible Study & Counseling  
+    - Community Outreach Programs  
+    - Youth & Family Ministries  
+    - Volunteer Opportunities  
+    - Online Spiritual Guidance
+    """)
+
+# ------------------------
+# STORE
+# ------------------------
+elif page == "Store":
+    st.header("🛒 Store")
+    st.markdown("""
+    Purchase church materials, books, merchandise, and more.  
+    Items available soon!
+    """)
 
 # ------------------------
 # ADMIN DASHBOARD
@@ -307,4 +379,3 @@ elif page == "Admin":
                 st.dataframe(entries_df, use_container_width=True)
         else:
             st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
-
