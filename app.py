@@ -96,7 +96,7 @@ with col2:
     if st.button("🚨 Report an Incident"): st.session_state.page = "Report Incident"
     if st.button("📖 Christian Feed"): st.session_state.page = "Christian Feed"
     if st.button("🏛 Tabernacle of David"): st.session_state.page = "Tabernacle of David"
-    if st.button("💬 WhatsApp Chat"): st.session_state.page = "WhatsApp Chat"
+    if st.button("💬 Internal Chat"): st.session_state.page = "Internal Chat"
     if st.button("💳 Donations / Giving"): st.session_state.page = "Donations"
     if st.button("ℹ️ About Us"): st.session_state.page = "About Us"
     if st.button("🛠 Services"): st.session_state.page = "Services"
@@ -293,26 +293,51 @@ elif page == "Tabernacle of David":
             st.success("✅ Tabernacle uploaded successfully!")
 
 # ------------------------
-# WHATSAPP CHAT
+# INTERNAL CHAT
 # ------------------------
-elif page == "WhatsApp Chat":
-    st.header("💬 WhatsApp Chat")
-    st.markdown("""
-    Join our official WhatsApp group to stay connected with other members.  
-    [Click here to join the WhatsApp Group](https://chat.whatsapp.com/example)  
-    Chat, ask questions, share prayer requests, and stay informed.
-    """)
+elif page == "Internal Chat":
+    st.header("💬 Community Chat")
+
+    # Chat storage
+    CHAT_FILE = "chat_messages.csv"
+    if not os.path.exists(CHAT_FILE):
+        pd.DataFrame(columns=["timestamp", "user", "message"]).to_csv(CHAT_FILE, index=False)
+
+    # Load messages
+    chat_df = pd.read_csv(CHAT_FILE)
+
+    # Display chat messages
+    if not chat_df.empty:
+        for _, row in chat_df.iterrows():
+            st.markdown(f"**{row['user']} [{row['timestamp']}]**: {row['message']}")
+
+    # User input
+    st.markdown("---")
+    with st.form("chat_form"):
+        user_name = st.text_input("Your Name", value=email if email else "")
+        message = st.text_input("Type your message here...")
+        send = st.form_submit_button("Send")
+        if send and message and user_name:
+            new_message = pd.DataFrame([{
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "user": user_name,
+                "message": message
+            }])
+            new_message.to_csv(CHAT_FILE, mode="a", index=False, header=False)
+            st.experimental_rerun()  # Refresh to show new message
 
 # ------------------------
 # DONATIONS / GIVING
 # ------------------------
 elif page == "Donations":
     st.header("💳 Donations / Giving")
-    st.markdown("Support the mission securely. Connect with your bank or card for online giving.")
-    st.text_input("Enter Amount")
-    st.selectbox("Choose Payment Method", ["Credit/Debit Card", "Bank Transfer", "PayPal"])
+    st.markdown("Donate securely to support our ministry. Connect your bank account below:")
+    st.text_input("Name on Account")
+    st.text_input("Bank Account Number")
+    st.text_input("Routing Number")
+    st.number_input("Amount", min_value=1)
     st.button("Donate 🧡")
-    st.info("All donations are secure and managed by the church administration.")
+    st.info("All donations are processed securely. For full integration, connect a payment processor like Stripe or PayPal.")
 
 # ------------------------
 # ABOUT US
@@ -320,11 +345,9 @@ elif page == "Donations":
 elif page == "About Us":
     st.header("ℹ️ About Us")
     st.markdown("""
-    **Apostle John Doe**  
-    Dedicated to spreading the Word of God and empowering Christians worldwide.  
-
-    **Mission Statement:**  
-    To reach every nation with the gospel, provide spiritual guidance, and uplift communities through outreach, education, and prayer.
+    **Apostle & Mission:**  
+    Our mission is to connect Christians worldwide and provide spiritual guidance, resources, and support.  
+    Led by Apostle [Name], we aim to spread the Word of God and serve our community through outreach and ministry programs.
     """)
 
 # ------------------------
@@ -333,12 +356,12 @@ elif page == "About Us":
 elif page == "Services":
     st.header("🛠 Services")
     st.markdown("""
-    - Worship & Prayer Services  
-    - Bible Study & Counseling  
+    **Our Services Include:**  
+    - Spiritual Counseling & Prayer  
     - Community Outreach Programs  
-    - Youth & Family Ministries  
-    - Volunteer Opportunities  
-    - Online Spiritual Guidance
+    - Bible Study & Resources  
+    - Worship Events & Media  
+    - Support & Welfare Services
     """)
 
 # ------------------------
@@ -346,10 +369,7 @@ elif page == "Services":
 # ------------------------
 elif page == "Store":
     st.header("🛒 Store")
-    st.markdown("""
-    Purchase church materials, books, merchandise, and more.  
-    Items available soon!
-    """)
+    st.markdown("Coming Soon: Buy ministry merchandise, books, and digital resources directly from our app.")
 
 # ------------------------
 # ADMIN DASHBOARD
