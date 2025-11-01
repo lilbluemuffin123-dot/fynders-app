@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import base64
 import datetime
+from streamlit_autorefresh import st_autorefresh
 
 # ------------------------
 # CONFIG
@@ -50,7 +51,6 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 DB_FILE = "uploads_db.csv"
 
-# Load previous uploads
 if os.path.exists(DB_FILE):
     db = pd.read_csv(DB_FILE)
     if not db.empty:
@@ -79,7 +79,7 @@ else:
     st.sidebar.warning("Please enter your email to continue.")
 
 # ------------------------
-# NAVIGATION BUTTONS
+# NAVIGATION
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
 st.subheader("Connecting Christians Worldwide")
@@ -165,13 +165,11 @@ elif page == "Field Entry":
             backup_path = "field_entries_backup.csv"
             df_new = pd.DataFrame([entry])
 
-            # Save main CSV
             if os.path.exists(file_path):
                 df_new.to_csv(file_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(file_path, index=False)
 
-            # Always update backup CSV
             if os.path.exists(backup_path):
                 df_new.to_csv(backup_path, mode='a', index=False, header=False)
             else:
@@ -248,7 +246,7 @@ elif page == "Word of Week":
     else:
         st.info("No Word of the Week uploaded yet.")
 
-    if st.session_state.is_admin:
+    if is_admin:
         upload = st.file_uploader(
             "Upload Word of the Week (PDF/Image/Text)", 
             type=["pdf","png","jpg","jpeg","txt"],
@@ -264,7 +262,7 @@ elif page == "Word of Week":
             st.success("✅ Word of the Week uploaded successfully!")
 
 # ------------------------
-# TABERNACLE OF DAVID
+# TABERNACLE
 # ------------------------
 elif page == "Tabernacle of David":
     st.header("🏛 Tabernacle of David")
@@ -277,7 +275,7 @@ elif page == "Tabernacle of David":
     else:
         st.info("No Tabernacle uploaded yet.")
 
-    if st.session_state.is_admin:
+    if is_admin:
         upload = st.file_uploader(
             "Upload Tabernacle PDF", 
             type=["pdf"],
@@ -293,38 +291,39 @@ elif page == "Tabernacle of David":
             st.success("✅ Tabernacle uploaded successfully!")
 
 # ------------------------
-# INTERNAL CHAT
+# INTERNAL LIVE CHAT
 # ------------------------
 elif page == "Internal Chat":
-    st.header("💬 Community Chat")
+    st.header("💬 Internal Admin Chat")
+    if not is_admin:
+        st.warning("❌ Only admin emails can access this chat.")
+        st.stop()
 
-    # Chat storage
-    CHAT_FILE = "chat_messages.csv"
+    CHAT_FILE = "live_chat.csv"
     if not os.path.exists(CHAT_FILE):
-        pd.DataFrame(columns=["timestamp", "user", "message"]).to_csv(CHAT_FILE, index=False)
+        pd.DataFrame(columns=["timestamp","user","message"]).to_csv(CHAT_FILE, index=False)
 
-    # Load messages
+    # Auto-refresh every 3 sec
+    st_autorefresh(interval=3000, key="chat_refresh")
+
     chat_df = pd.read_csv(CHAT_FILE)
-
-    # Display chat messages
+    st.markdown("---")
     if not chat_df.empty:
         for _, row in chat_df.iterrows():
             st.markdown(f"**{row['user']} [{row['timestamp']}]**: {row['message']}")
 
-    # User input
     st.markdown("---")
     with st.form("chat_form"):
-        user_name = st.text_input("Your Name", value=email if email else "")
         message = st.text_input("Type your message here...")
         send = st.form_submit_button("Send")
-        if send and message and user_name:
+        if send and message:
             new_message = pd.DataFrame([{
                 "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "user": user_name,
+                "user": email,
                 "message": message
             }])
             new_message.to_csv(CHAT_FILE, mode="a", index=False, header=False)
-            st.experimental_rerun()  # Refresh to show new message
+            st.experimental_rerun()
 
 # ------------------------
 # DONATIONS / GIVING
@@ -376,26 +375,24 @@ elif page == "Store":
 # ------------------------
 elif page == "Admin":
     st.header("📋 Admin Dashboard")
-    email = st.text_input("Enter your admin email")
-    if email:
-        if email.endswith("@c25.com"):
-            st.session_state.is_admin = True
-            st.header("📋 Admin Dashboard – Follow-Up Overview")
-            file_path = "field_entries.csv"
-            backup_path = "field_entries_backup.csv"
+    email_input = st.text_input("Enter your admin email")
+    if email_input and email_input.endswith("@c25.com"):
+        st.session_state.is_admin = True
+        st.header("📋 Admin Dashboard – Follow-Up Overview")
+        file_path = "field_entries.csv"
+        backup_path = "field_entries_backup.csv"
 
-            # Read main CSV, if missing, try backup
-            if os.path.exists(file_path):
-                entries_df = pd.read_csv(file_path)
-            elif os.path.exists(backup_path):
-                entries_df = pd.read_csv(backup_path)
-                st.warning("⚠️ Main CSV missing. Loaded from backup.")
-            else:
-                entries_df = pd.DataFrame()
-
-            if entries_df.empty:
-                st.info("No field entries submitted yet.")
-            else:
-                st.dataframe(entries_df, use_container_width=True)
+        if os.path.exists(file_path):
+            entries_df = pd.read_csv(file_path)
+        elif os.path.exists(backup_path):
+            entries_df = pd.read_csv(backup_path)
+            st.warning("⚠️ Main CSV missing. Loaded from backup.")
         else:
-            st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
+            entries_df = pd.DataFrame()
+
+        if entries_df.empty:
+            st.info("No field entries submitted yet.")
+        else:
+            st.dataframe(entries_df, use_container_width=True)
+    else:
+        st.warning("❌ Invalid email. Please enter a valid @c25.com email.")
