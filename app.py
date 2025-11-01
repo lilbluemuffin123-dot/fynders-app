@@ -15,67 +15,28 @@ st.set_page_config(
 )
 
 # ------------------------
-# CUSTOM CSS (Mobile-Friendly)
+# CUSTOM CSS
 # ------------------------
 st.markdown("""
 <style>
-/* Hide default Streamlit menu, footer, and header */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-
-/* General page background */
-body, .stApp, .block-container, .main {
-    background: linear-gradient(135deg, #ff9f43, #ff6b00);
-    color: white;
-    font-family: 'Helvetica', sans-serif;
-}
-
-/* Links */
+body, .stApp, .block-container, .main {background: linear-gradient(135deg, #ff9f43, #ff6b00); color: white; font-family: 'Helvetica', sans-serif;}
 a {color: white !important; text-decoration: none;}
-
-/* Headings, paragraphs, spans */
 p, h1, h2, h3, h4, h5, h6, li, span {color: white !important;}
-
-/* Buttons */
-.stButton>button {
-    background: linear-gradient(90deg, #ffb84d, #ff6b00);
-    color: white;
-    font-weight: bold;
-    border-radius: 15px;
-    padding: 15px;
-    font-size: 16px;
-    width: 100%;
-    transition: all 0.2s ease-in-out;
-}
+.stButton>button {background: linear-gradient(90deg, #ffb84d, #ff6b00); color: white; font-weight: bold; border-radius: 15px; padding: 15px; font-size: 18px; width: 100%; transition: all 0.2s ease-in-out;}
 .stButton>button:hover {transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-
-/* DataFrame & markdown cards */
-.stDataFrame, .stMarkdown, .card {
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-/* Input fields - white text on black for mobile */
-.stTextInput>div>div>input,
-.stTextArea textarea,
-.stNumberInput>div>input {
-    color: white;
-    background-color: black;
-}
-
-/* Chat bubbles */
-.chat-bubble {padding:10px; border-radius:15px; margin:5px; max-width:80%; word-wrap: break-word;}
-.chat-bubble.user {background:#000; text-align:left;}
-.chat-bubble.admin {background:#ffb84d; text-align:right; color:black;}
-.chat-timestamp {font-size:10px; opacity:0.7;}
-
-/* Make columns stack on mobile */
-@media only screen and (max-width: 768px) {
-    .stColumns {flex-direction: column;}
-    .stButton>button {font-size:14px; padding:12px;}
+.stDataFrame, .stMarkdown {border-radius: 15px; background: rgba(255, 255, 255, 0.08); padding: 15px; margin-bottom: 20px;}
+.card {border-radius: 15px; background: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 20px;}
+.stTextInput>div>div>input {color: white;}
+.stTextArea textarea {color: white;}
+.chat-bubble {padding:10px; margin-bottom:5px; border-radius:10px;}
+.chat-bubble.user {background: rgba(255,255,255,0.2);}
+.chat-bubble.admin {background: rgba(0,0,0,0.3);}
+.chat-timestamp {font-size:10px; color: #ccc; text-align:right;}
+@media(max-width:768px){
+    .stTextInput>div>div>input, .stTextArea textarea {color:white; background:black;}
 }
 </style>
 """, unsafe_allow_html=True)
@@ -87,6 +48,7 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 DB_FILE = "uploads_db.csv"
 
+# Load previous uploads
 if os.path.exists(DB_FILE):
     db = pd.read_csv(DB_FILE)
     if not db.empty:
@@ -102,17 +64,31 @@ if "is_admin" not in st.session_state: st.session_state.is_admin = False
 if "email" not in st.session_state: st.session_state.email = ""
 
 # ------------------------
-# LOGIN
+# MOBILE-FRIENDLY TOP LOGIN
+# ------------------------
+if st.session_state.email == "":
+    st.markdown("### 👋 Please log in")
+    email_input_top = st.text_input("Enter your email to continue", key="top_login")
+    if email_input_top:
+        st.session_state.email = email_input_top
+        st.session_state.is_admin = email_input_top.lower().endswith("@c25.com")
+        if st.session_state.is_admin:
+            st.success(f"✅ Admin: {email_input_top}")
+        else:
+            st.info(f"👤 User: {email_input_top}")
+
+# ------------------------
+# SIDEBAR LOGIN
 # ------------------------
 st.sidebar.header("Login")
-email_input = st.sidebar.text_input("Enter your email")
-if email_input:
-    st.session_state.email = email_input
-    st.session_state.is_admin = email_input.lower().endswith("@c25.com")
+email_input_sidebar = st.sidebar.text_input("Enter your email", value=st.session_state.email, key="sidebar_login")
+if email_input_sidebar:
+    st.session_state.email = email_input_sidebar
+    st.session_state.is_admin = email_input_sidebar.lower().endswith("@c25.com")
     if st.session_state.is_admin:
-        st.sidebar.success(f"✅ Admin: {email_input}")
+        st.sidebar.success(f"✅ Admin: {email_input_sidebar}")
     else:
-        st.sidebar.info(f"👤 User: {email_input}")
+        st.sidebar.info(f"👤 User: {email_input_sidebar}")
 else:
     st.sidebar.warning("Please enter your email to continue.")
 
@@ -120,7 +96,7 @@ email = st.session_state.email
 is_admin = st.session_state.is_admin
 
 # ------------------------
-# NAVIGATION
+# NAVIGATION BUTTONS
 # ------------------------
 st.title("✨ FYNDERS — Field Outreach App")
 st.subheader("Connecting Christians Worldwide")
@@ -160,17 +136,16 @@ def get_download_link(file_path, label):
 # ------------------------
 if page == "Home":
     st.header("🌍 Connecting Christians Worldwide")
-    st.markdown("""
-    **Features at your fingertips:**  
-    - Give online securely; access church ministry resources.  
-    - Watch videos and pictures of worship, events, and community outreach.  
-    - Speak psalms, hymns, spiritual songs and upload your own songs.  
-    - Read the Bible and download e-books from the commission.  
-    - Listen to 24-hour worship music and download TOD Daily prayers.  
-    - Find a C25 or CC3 location near you.  
-    - Report incidents affecting any member that needs urgent attention.  
-    - Connect globally — translations to 7000+ languages.  
-    """)
+    st.markdown("""**Features at your fingertips:**  
+- Give online securely; access church ministry resources.  
+- Watch videos and pictures of worship, events, and community outreach.  
+- Speak psalms, hymns, spiritual songs and upload your own songs.  
+- Read the Bible and download e-books from the commission.  
+- Listen to 24-hour worship music and download TOD Daily prayers.  
+- Find a C25 or CC3 location near you.  
+- Report incidents affecting any member that needs urgent attention.  
+- Connect globally — translations to 7000+ languages.""")
+
     st.markdown("**Daily Bible Verse:**")
     st.info("“For I know the plans I have for you,” declares the Lord — Jeremiah 29:11", icon="📖")
 
@@ -205,14 +180,19 @@ elif page == "Field Entry":
             file_path = "field_entries.csv"
             backup_path = "field_entries_backup.csv"
             df_new = pd.DataFrame([entry])
+
+            # Save main CSV
             if os.path.exists(file_path):
                 df_new.to_csv(file_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(file_path, index=False)
+
+            # Always update backup CSV
             if os.path.exists(backup_path):
                 df_new.to_csv(backup_path, mode='a', index=False, header=False)
             else:
                 df_new.to_csv(backup_path, index=False)
+
             st.success("✅ Entry submitted successfully and saved securely!")
 
 # ------------------------
@@ -266,7 +246,6 @@ elif page == "Christian Feed":
 # WORD OF THE WEEK
 # ------------------------
 elif page == "Word of Week":
-    st.header("📖 Word of the Week")
     word_files = db[db['type'] == "word_of_week"]
     latest_file_path = None
     if not word_files.empty:
@@ -303,7 +282,6 @@ elif page == "Word of Week":
 # TABERNACLE
 # ------------------------
 elif page == "Tabernacle of David":
-    st.header("🏛 Tabernacle of David")
     tab_files = db[db['type'] == "tabernacle"]
     latest_file_path = None
     if not tab_files.empty:
